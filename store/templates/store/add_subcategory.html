@@ -1,0 +1,15 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div style="max-width:400px; margin:50px auto; background:white; padding:20px; border-radius:10px;">
+  <h3>Add Subcategory</h3>
+  <form method="POST">{% csrf_token %}
+    <select name="category" required style="width:100%; padding:10px; margin:10px 0;">
+      {% for c in categories %}
+      <option value="{{ c.id }}">{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="name" placeholder="Ex: Daily Kit" required style="width:100%; padding:10px; margin:10px 0;">
+    <button type="submit" style="width:100%; padding:10px; background:green; color:white; border:none; border-radius:5px;">Save Subcategory</button>
+  </form>
+</div>
+{% endblock %}

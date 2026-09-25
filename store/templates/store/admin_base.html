@@ -1,0 +1,305 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Freshora</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --sidebar-green: #0a7e07;
+      --sidebar-dark-green: #075e05;
+      --bg-light: #f4f6f8;
+      --text-dark: #1f2937;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-light);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Green Sidebar */
+    .admin-sidebar {
+      width: 250px;
+      background: var(--sidebar-green);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      min-height: 100vh;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 24px 20px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .sidebar-brand i {
+      font-size: 24px;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 20px 0;
+      flex: 1;
+    }
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-menu li a:hover,
+    .sidebar-menu li.active a {
+      background: var(--sidebar-dark-green);
+      color: #ffffff;
+    }
+    .sidebar-menu li a i {
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+    /* Main Area */
+    .admin-main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .admin-topbar {
+      background: #ffffff;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .topbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn-view-store {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .btn-view-store:hover {
+      background: #dcfce7;
+      color: #14532d;
+    }
+    .btn-topbar-logout {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    .btn-topbar-logout:hover {
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+    .admin-user-wrap {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      user-select: none;
+    }
+    .admin-user-trigger {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: #f3f4f6;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #374151;
+    }
+    .admin-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: white;
+      padding: 10px 16px;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      z-index: 1000;
+      min-width: 140px;
+      border: 1px solid #e5e7eb;
+    }
+    .admin-dropdown.show,
+    .admin-user-wrap:hover .admin-dropdown {
+      display: block;
+    }
+    .admin-dropdown a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #d32f2f;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 6px 0;
+    }
+    .admin-dropdown a:hover {
+      color: #9a0007;
+    }
+    .admin-content-area {
+      padding: 24px 28px;
+      flex: 1;
+    }
+    /* Common Card Styling */
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid #e5e7eb;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .card p {
+      margin: 8px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: #4b5563;
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <a href="{% url 'admin_dashboard' %}" class="sidebar-brand">
+      <i class="fa-solid fa-basket-shopping"></i>
+      <span>Freshora Admin</span>
+    </a>
+    <ul class="sidebar-menu">
+      <li class="active"><a href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
+      <li><a href="{% url 'add_product' %}"><i class="fa-solid fa-box"></i> Add Product</a></li>
+      <li><a href="{% url 'admin_orders' %}"><i class="fa-solid fa-clipboard-list"></i> Orders</a></li>
+      <li><a href="{% url 'admin_logins' %}"><i class="fa-solid fa-users"></i> Logins</a></li>
+      <li><a href="javascript:void(0)" onclick="if(typeof openCategoryOnlyModal==='function'){openCategoryOnlyModal(); return false;} else {window.location.href='{% url 'admin_dashboard' %}?open=category';}"><i class="fa-solid fa-layer-group"></i> Categories</a></li>
+      <li><a href="javascript:void(0)" onclick="if(typeof openSubcategoryOnlyModal==='function'){openSubcategoryOnlyModal(); return false;} else {window.location.href='{% url 'admin_dashboard' %}?open=subcategory';}"><i class="fa-solid fa-tags"></i> Subcategories</a></li>
+      <li><a href="{% url 'dashboard_coupons' %}"><i class="fa-solid fa-ticket"></i> Coupons</a></li>
+      <li style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.15);">
+        <a href="{% url 'home' %}" onclick="window.location.href='{% url 'home' %}';"><i class="fa-solid fa-store"></i> View Store</a>
+      </li>
+      <li>
+        <a href="{% url 'admin_logout' %}" onclick="window.location.href='{% url 'admin_logout' %}';"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="admin-main-wrapper">
+    <header class="admin-topbar">
+      <div class="topbar-title">
+        <i class="fa-solid fa-chart-line" style="color:#0a7e07;"></i>
+        <span>Dashboard Overview</span>
+      </div>
+      
+      <div class="topbar-actions">
+        <!-- View Store Button -->
+        <a href="{% url 'home' %}" class="topbar-btn btn-view-store" title="Go to customer-facing store">
+          <i class="fa-solid fa-store"></i>
+          <span>View Store</span>
+        </a>
+
+        <!-- User Dropdown -->
+        <div class="admin-user-wrap" onclick="toggleUserDropdown(event)">
+          <div class="admin-user-trigger">
+            <span>👤 {{ request.user.username|default:'Admin' }}</span>
+            <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+          </div>
+          <div class="admin-dropdown" id="userDropdown">
+            <a href="{% url 'admin_logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+          </div>
+        </div>
+
+        <!-- Direct Logout Button -->
+        <a href="{% url 'admin_logout' %}" class="topbar-btn btn-topbar-logout" title="Log out of admin session">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="admin-content-area">
+      {% block content %}
+      {% endblock %}
+    </main>
+  </div>
+
+  <script>
+    function toggleUserDropdown(e) {
+      const drop = document.getElementById('userDropdown');
+      if (drop) {
+        drop.classList.toggle('show');
+      }
+    }
+    document.addEventListener('click', function(e) {
+      const wrap = document.querySelector('.admin-user-wrap');
+      const drop = document.getElementById('userDropdown');
+      if (wrap && drop && !wrap.contains(e.target)) {
+        drop.classList.remove('show');
+      }
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

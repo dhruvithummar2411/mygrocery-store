@@ -1,0 +1,25 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<h2>{% if coupon %}Edit{% else %}Add{% endif %} Coupon</h2>
+<form method="POST">
+{% csrf_token %}
+<label>Coupon Code (ex: SAVE10):</label><br>
+<input type="text" name="code" value="{{ coupon.code|default:'' }}" required style="width:100%;padding:8px;"><br><br>
+
+<label>Discount % (1-90):</label><br>
+<input type="number" name="discount_percent" value="{{ coupon.discount_percent|default:'' }}" required style="width:100%;padding:8px;"><br><br>
+
+<label>Valid From</label><br>
+<input type="datetime-local" name="valid_from" required style="width:100%;padding:8px;"><br><br>
+
+<label>Expired Date (Valid To)</label><br>
+<input type="datetime-local" name="valid_to" required style="width:100%;padding:8px;"><br><br>
+
+<label>Min Order Amount:</label><br>
+<input type="number" name="min_amount" value="{{ coupon.min_amount|default:'0' }}" style="width:100%;padding:8px;"><br><br>
+
+<label><input type="checkbox" name="active" {% if coupon.active or not coupon %}checked{% endif %}> Active</label><br><br>
+
+<button type="submit" style="padding:10px 20px;background:black;color:white;">Save Coupon</button>
+</form>
+{% endblock %}

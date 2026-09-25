@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Orders | Freshora</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root { --ink:#162b22; --muted:#64746d; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#f5f8f7; color:var(--ink); font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .admin-shell { min-height:100vh; padding-bottom:34px; }
+    .admin-header { min-height:92px; background:#fff; border-radius:0 0 16px 16px; box-shadow:0 5px 16px rgba(29,53,45,.12); display:grid; grid-template-columns:280px minmax(280px, 500px) 240px; justify-content:space-between; align-items:center; gap:22px; padding:14px 34px; }
+    .brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:#223d34; }
+    .brand-mark { width:56px; height:56px; border-radius:16px; background:#d8f5df; display:flex; align-items:center; justify-content:center; color:#109b51; font-size:31px; }
+    .brand-title { display:block; font-size:25px; line-height:1; font-weight:850; letter-spacing:-.8px; }
+    .brand-subtitle { display:block; color:#789087; font-size:11px; font-weight:700; margin-top:5px; }
+    .dashboard-search { display:flex; align-items:center; gap:12px; border:1px solid #d8dfdb; background:#fbfcfb; border-radius:12px; padding:10px 15px; }
+    .dashboard-search i { color:#53645d; }
+    .dashboard-search input { width:100%; border:0; outline:0; background:transparent; font-size:15px; }
+    .header-actions { display:flex; align-items:center; justify-content:flex-end; gap:20px; }
+    .notification { position:relative; color:#182c24; font-size:22px; }
+    .notification-badge { position:absolute; top:-9px; right:-9px; background:#d92020; color:#fff; width:19px; height:19px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; }
+    .admin-user { display:flex; align-items:center; gap:9px; font-weight:700; }
+    .admin-avatar { width:42px; height:42px; border-radius:50%; background:#24a15a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; }
+    .admin-user i { color:#4f635b; font-size:12px; }
+    .dashboard-content { max-width:1280px; margin:30px auto 0; padding:0 34px; }
+    
+    .page-title-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:14px; }
+    .page-title { margin:0; font-size:26px; font-weight:800; color:#133c2a; display:flex; align-items:center; gap:10px; }
+    .badge-count { background:#dcf5e3; color:#127b3d; font-size:13px; font-weight:700; padding:4px 12px; border-radius:20px; }
+    .back-btn { display:inline-flex; align-items:center; gap:8px; background:#fff; border:1px solid #c7d8ce; color:#185b37; text-decoration:none; padding:9px 16px; border-radius:10px; font-weight:700; font-size:13px; transition:all 0.2s; box-shadow:0 2px 6px rgba(0,0,0,0.04); }
+    .back-btn:hover { background:#f0f7f2; border-color:#9dc2ab; }
+
+    .orders-card { background:#fff; border-radius:18px; box-shadow:0 8px 24px rgba(31,59,48,.08); padding:22px 26px; border:1px solid #e1e9e4; }
+    .table-responsive { width:100%; overflow-x:auto; }
+    .orders-table { width:100%; border-collapse:collapse; font-size:14px; text-align:left; }
+    .orders-table th { background:#143e2d; color:#fff; padding:12px 14px; font-weight:700; white-space:nowrap; }
+    .orders-table th:first-child { border-top-left-radius:10px; }
+    .orders-table th:last-child { border-top-right-radius:10px; }
+    .orders-table td { padding:13px 14px; border-bottom:1px solid #edf2ef; vertical-align:middle; color:#1f3529; }
+    .orders-table tr:last-child td { border-bottom:none; }
+    .orders-table tbody tr:hover { background:#f9fcf9; }
+
+    .status-badge { display:inline-block; padding:4px 11px; border-radius:20px; font-size:12px; font-weight:700; text-align:center; }
+    .status-ordered { background:#e3f2fd; color:#1565c0; }
+    .status-packed { background:#fff8e1; color:#f57f17; }
+    .status-shipped { background:#e8eaf6; color:#3949ab; }
+    .status-delivered { background:#e8f5e9; color:#2e7d32; }
+    .status-cancelled { background:#ffebee; color:#c62828; }
+
+    .btn-view { display:inline-flex; align-items:center; gap:6px; background:#0ca860; color:#fff; text-decoration:none; padding:6px 13px; border-radius:7px; font-size:12px; font-weight:700; transition:background 0.2s; white-space:nowrap; }
+    .btn-view:hover { background:#098c4f; }
+
+    @media (max-width:1050px) {
+      .admin-header { grid-template-columns:1fr 1fr; }
+      .dashboard-search { grid-column:1 / -1; grid-row:2; order:3; }
+      .header-actions { grid-column:2; grid-row:1; }
+    }
+    @media (max-width:700px) {
+      .admin-header { padding:12px 16px; grid-template-columns:1fr auto; }
+      .brand-title { font-size:21px; }
+      .brand-mark { width:45px; height:45px; font-size:24px; }
+      .header-actions { gap:10px; }
+      .admin-user span:not(.admin-avatar), .admin-user i { display:none; }
+      .dashboard-content { padding:0 14px; margin-top:18px; }
+      .orders-card { padding:14px 10px; }
+      .orders-table th, .orders-table td { padding:10px 8px; font-size:13px; }
+    }
+    @media (max-width:420px) {
+      .brand-subtitle { display:none; }.brand-title { font-size:18px; }
+      .dashboard-search input { font-size:13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <a class="brand" href="{% url 'admin_dashboard' %}">
+        <span class="brand-mark"><i class="fa-solid fa-basket-shopping"></i></span>
+        <span>
+          <span class="brand-title">Admin Dashboard</span>
+          <span class="brand-subtitle">Freshora – DailyDrop Grocery</span>
+        </span>
+      </a>
+      <form class="dashboard-search" method="get" action="{% url 'home' %}">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input name="q" placeholder="Search products, orders, categories..." aria-label="Search products, orders, categories">
+      </form>
+      <div class="header-actions">
+        <span class="notification" title="Notifications"><i class="fa-solid fa-bell"></i><b class="notification-badge">3</b></span>
+        <span class="h-8 w-px bg-slate-200"></span>
+        <div class="admin-user">
+          <span class="admin-avatar">AD</span>
+          <span>{{ request.user.username|default:'Admin' }}</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <div class="page-title-row">
+        <h1 class="page-title">
+          <i class="fa-solid fa-clipboard-list" style="color:#0ca860;"></i> Orders Management
+          <span class="badge-count">{{ orders|length }} Total</span>
+        </h1>
+        <a href="{% url 'admin_dashboard' %}" class="back-btn">
+          <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+      </div>
+
+      <div class="orders-card">
+        <div class="table-responsive">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer Name</th>
+                <th>Phone</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+              <tr>
+                <td><strong>#{{ order.id }}</strong></td>
+                <td>{{ order.customer_name|default:"Guest" }}</td>
+                <td>{{ order.customer_phone|default:"-" }}</td>
+                <td><strong>₹{{ order.total_amount|floatformat:2 }}</strong></td>
+                <td>
+                  <span class="status-badge status-{{ order.status|lower }}">{{ order.status }}</span>
+                </td>
+                <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
+                <td>
+                  <a href="{% url 'bill_detail' order.id %}" class="btn-view">
+                    <i class="fa-solid fa-eye"></i> View Details
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" style="text-align:center; padding:30px; color:#688073;">
+                  No orders found.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

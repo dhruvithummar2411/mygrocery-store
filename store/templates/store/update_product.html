@@ -1,0 +1,76 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<style>
+  .product-form-page{max-width:760px;margin:28px auto;padding:0 14px}.product-form-card{background:#fff;border-radius:16px;box-shadow:0 6px 20px rgba(26,55,42,.1);padding:24px}.product-form-card h1{margin:0 0 5px;color:#123c28;font-size:26px}.product-form-card .form-subtitle{margin:0 0 22px;color:#687970;font-size:13px}.product-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.product-field{display:flex;flex-direction:column;gap:6px}.product-field.full{grid-column:1/-1}.product-field label{font-size:13px;font-weight:700;color:#244c37}.product-field input,.product-field select,.product-field textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd8cf;border-radius:8px;font:inherit;outline:0}.product-field input:focus,.product-field select:focus,.product-field textarea:focus{border-color:#179b50;box-shadow:0 0 0 3px rgba(23,155,80,.12)}.current-image{width:100px;height:100px;object-fit:contain;border:1px solid #dbe5dd;border-radius:9px;padding:5px}.form-actions{display:flex;gap:10px;align-items:center;margin-top:22px}.save-product{background:#079b45;color:#fff;border:0;border-radius:8px;padding:11px 20px;font-weight:700;cursor:pointer}.cancel-product{color:#315f44;text-decoration:none;font-weight:700}.form-help{font-size:11px;color:#718179}
+  @media(max-width:600px){.product-form-grid{grid-template-columns:1fr}.product-field.full{grid-column:auto}.product-form-card{padding:18px}.form-actions{flex-direction:column;align-items:stretch}.save-product{text-align:center}}
+</style>
+<div class="product-form-page"><div class="product-form-card">
+  <h1>Edit Product</h1><p class="form-subtitle">Update product details, pricing, stock and discount.</p>
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}
+    <div class="product-form-grid">
+      <div class="product-field"><label for="product-name">Product name</label><input id="product-name" type="text" name="name" value="{{ product.name }}" required></div>
+      <div class="product-field"><label for="product-price">Price (₹)</label><input id="product-price" type="number" name="price" step="0.01" min="0" value="{{ product.price }}" required></div>
+      <div class="product-field"><label for="product-stock">Stock</label><input id="product-stock" type="number" name="stock" min="0" value="{{ product.stock }}" required></div>
+      <div class="product-field"><label for="product-discount">Discount (%)</label><input id="product-discount" type="number" name="discount_percent" min="0" max="100" value="{{ product.discount_percent }}" required><span class="form-help">Use 0 for no discount.</span></div>
+      <div class="product-field full" style="background:#fff5f5; border:1px solid #fecaca; border-radius:10px; padding:12px;">
+        <label style="cursor:pointer; font-weight:700; color:#b91c1c; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="is_flash_deal" id="edit_is_flash_deal" {% if product.is_flash_deal %}checked{% endif %} style="width:18px; height:18px; accent-color:#dc2626;">
+          🔥 Enable Flash Deal
+        </label>
+        <div id="edit-flash-deal-time-wrap" style="{% if not product.is_flash_deal %}display:none;{% endif %} margin-top:10px;">
+          <label for="edit_flash_end_time" style="font-size:12px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Deal End Time:</label>
+          <input type="datetime-local" name="flash_end_time" id="edit_flash_end_time" value="{{ product.flash_end_time|date:'Y-m-d\TH:i' }}" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
+        </div>
+      </div>
+      <script>
+        (function(){
+          const chk = document.getElementById('edit_is_flash_deal');
+          const wrap = document.getElementById('edit-flash-deal-time-wrap');
+          if(chk && wrap){
+            chk.addEventListener('change', function(){
+              wrap.style.display = this.checked ? 'block' : 'none';
+            });
+          }
+        })();
+      </script>
+      <div class="product-field"><label for="product-category">Category</label><select id="product-category" name="category" required>{% for cat in categories %}<option value="{{ cat.id }}" {% if product.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}</select></div>
+      <div class="product-field"><label for="product-subcategory">Subcategory</label><select id="product-subcategory" name="subcategory"><option value="">No subcategory</option>{% for sub in subcategories %}<option value="{{ sub.id }}" {% if product.subcategory_id == sub.id %}selected{% endif %}>{{ sub.name }}</option>{% endfor %}</select></div>
+      <div class="product-field full"><label for="product-description">Description</label><textarea id="product-description" name="description" rows="4">{{ product.description|default:'' }}</textarea></div>
+      <div class="product-field full"><label>Current image</label>{% if product.image %}<img class="current-image" src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<span class="form-help">No image uploaded.</span>{% endif %}</div>
+      <div class="product-field full"><label for="product-image">Change image</label><input id="product-image" type="file" name="image" accept="image/*"></div>
+    </div>
+
+    <div style="margin-top:25px; border-top:1px solid #eee; padding-top:15px;">
+      <label style="font-weight:700;">Product Variants</label>
+      <div id="variants-container" style="margin-top:10px;">
+        {% for v in product.variants.all %}
+        <div class="variant-row" style="display:flex; gap:8px; margin-bottom:10px;">
+          <input type="text" name="variant_name" value="{{ v.name }}" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;">
+          <input type="number" step="0.01" name="variant_price" value="{{ v.price }}" style="width:90px; padding:8px; border:1px solid #ddd; border-radius:6px;">
+          <input type="number" name="variant_stock" value="{{ v.stock }}" style="width:80px; padding:8px; border:1px solid #ddd; border-radius:6px;">
+          <button type="button" onclick="this.parentElement.remove()" style="background:#ff4444; color:white; border:none; border-radius:6px; padding:0 10px;">X</button>
+        </div>
+        {% empty %}
+        <div class="variant-row" style="display:flex; gap:8px; margin-bottom:10px;">
+          <input type="text" name="variant_name" placeholder="500ml" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;">
+          <input type="number" step="0.01" name="variant_price" placeholder="Price" style="width:90px; padding:8px; border:1px solid #ddd; border-radius:6px;">
+          <input type="number" name="variant_stock" placeholder="Stock" style="width:80px; padding:8px; border:1px solid #ddd; border-radius:6px;">
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="add-variant-btn" style="background:#e8f5e9; border:1px dashed #4caf50; padding:6px 12px; border-radius:6px; color:#2e7d32;">+ Add More Variant</button>
+    </div>
+    <script>
+    document.getElementById('add-variant-btn')?.addEventListener('click', function(){
+      const c=document.getElementById('variants-container');
+      const d=document.createElement('div');
+      d.style='display:flex; gap:8px; margin-bottom:10px;';
+      d.innerHTML=`<input type="text" name="variant_name" placeholder="500ml" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;"><input type="number" step="0.01" name="variant_price" placeholder="Price" style="width:90px;"><input type="number" name="variant_stock" placeholder="Stock" style="width:80px;"><button type="button" onclick="this.parentElement.remove()">X</button>`;
+      c.appendChild(d);
+    });
+    </script>
+
+    <div class="form-actions"><button class="save-product" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button><a class="cancel-product" href="{% url 'admin_dashboard' %}">Cancel</a></div>
+  </form>
+</div></div>
+{% endblock %}

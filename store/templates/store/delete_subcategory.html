@@ -1,0 +1,7 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div style="max-width:480px;margin:50px auto;background:#fff;padding:24px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1)">
+  <h2>Delete Subcategory?</h2><p>Delete <b>{{ subcategory.name }}</b> from <b>{{ subcategory.category.name }}</b>?</p>
+  <form method="post">{% csrf_token %}<button type="submit" style="background:#d62727;color:white;border:0;border-radius:6px;padding:10px 16px">Delete Subcategory</button><a href="{% url 'admin_dashboard' %}" style="margin-left:12px">Cancel</a></form>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div style="max-width:400px; margin:50px auto; background:white; padding:20px; border-radius:10px;">
+  <h3>Add Category</h3>
+  <form method="POST">{% csrf_token %}
+    <input type="text" name="name" placeholder="Ex: Combos" required style="width:100%; padding:10px; margin:10px 0;">
+    <button type="submit" style="width:100%; padding:10px; background:green; color:white; border:none; border-radius:5px;">Save Category</button>
+  </form>
+</div>
+{% endblock %}

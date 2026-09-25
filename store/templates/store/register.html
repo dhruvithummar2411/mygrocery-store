@@ -1,0 +1,46 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div style="max-width:400px; margin:50px auto; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); background:#fff;">
+    <h2 style="text-align:center; color:#28a745; margin-bottom:20px;">Create Account</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold;">Username</label>
+            {{ form.username }}
+            <small style="color:gray;">Letters, digits and @/./+/-/_ only.</small>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold;">Password</label>
+            {{ form.password1 }}
+            <small style="color:gray;">Min 8 characters</small>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold;">Confirm Password</label>
+            {{ form.password2 }}
+        </div>
+        
+        {% if form.errors %}
+            <p style="color:red; font-size:14px;">{{ form.errors }}</p>
+        {% endif %}
+
+        <button type="submit" style="width:100%; padding:12px; background:#28a745; color:white; border:none; border-radius:6px; font-size:16px; cursor:pointer;">
+            Sign Up
+        </button>
+    </form>
+    
+    <p style="text-align:center; margin-top:15px;">
+        Already have account? <a href="{% url 'login' %}" style="color:#28a745;">Login Here</a>
+    </p>
+</div>
+
+<style>
+input[type=text], input[type=password] {
+    width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+}
+
+</style>
+{% endblock %}

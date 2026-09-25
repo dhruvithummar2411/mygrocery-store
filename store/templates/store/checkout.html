@@ -1,0 +1,444 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .checkout-page-wrap {
+    max-width: 560px;
+    margin: 36px auto 50px;
+    padding: 0 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .checkout-card {
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.09);
+    overflow: hidden;
+    border: 1px solid #eef2f0;
+  }
+
+  .checkout-header {
+    background: linear-gradient(135deg, #0C831F 0%, #168341 100%);
+    padding: 28px 24px 24px;
+    text-align: center;
+    color: #ffffff;
+  }
+
+  .checkout-icon-ring {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 26px;
+  }
+
+  .checkout-header h1 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .checkout-header p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.92;
+  }
+
+  .checkout-body {
+    padding: 22px 24px 28px;
+  }
+
+  .checkout-alert {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .section-heading {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2a35;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  
+  .order-summary-box {
+    background: #f5f6f8;
+    border: 1px solid #e3e6ea;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    overflow-x: auto;
+  }
+
+  .order-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .order-summary-table th {
+    text-align: left;
+    color: #6a7482;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e6eb;
+  }
+
+  .order-summary-table th.text-right,
+  .order-summary-table td.text-right {
+    text-align: right;
+  }
+
+  .order-summary-table th.text-center,
+  .order-summary-table td.text-center {
+    text-align: center;
+  }
+
+  .order-summary-table td {
+    padding: 10px 0;
+    color: #2b3643;
+    border-bottom: 1px solid #edf1f5;
+    vertical-align: middle;
+  }
+
+  .order-summary-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .item-name {
+    font-weight: 600;
+    color: #1f2a35;
+    max-width: 220px;
+    line-height: 1.3;
+  }
+
+  .grand-total-row td {
+    padding-top: 12px;
+    border-top: 1.5px solid #dce2e8;
+    border-bottom: none;
+    font-size: 14px;
+  }
+
+  .grand-total-val {
+    color: #0C831F;
+    font-weight: 800;
+    font-size: 17px;
+  }
+
+  /* ── Form Inputs ── */
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4b5768;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .form-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1.5px solid #dde1e7;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+    transition: all 0.18s ease;
+    font-family: inherit;
+  }
+
+  .form-input:focus {
+    border-color: #0C831F;
+    box-shadow: 0 0 0 3px rgba(12, 131, 31, 0.12);
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ── COD Info Box ── */
+  .cod-info-box {
+    border: 1.5px dashed #0C831F;
+    background: #e8f5e9;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 18px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cod-info-icon {
+    width: 36px;
+    height: 36px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #0C831F;
+    flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(12, 131, 31, 0.15);
+  }
+
+  .cod-info-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #125424;
+    line-height: 1.35;
+  }
+
+  .cod-info-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: #1e7033;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* ── Place Order Button ── */
+  .btn-place-order {
+    width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #0C831F 0%, #168341 100%);
+    color: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(12, 131, 31, 0.32);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+
+  .btn-place-order:hover {
+    background: linear-gradient(135deg, #096818 0%, #13743a 100%);
+    box-shadow: 0 6px 20px rgba(12, 131, 31, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-place-order:active {
+    transform: translateY(0);
+  }
+
+  .back-cart-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 16px;
+    color: #556575;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: color 0.15s ease;
+  }
+
+  .back-cart-link:hover {
+    color: #0C831F;
+  }
+</style>
+
+<div class="checkout-page-wrap">
+  <div class="checkout-card">
+    
+    <!-- Header -->
+    <div class="checkout-header">
+      <div class="checkout-icon-ring">
+        <i class="fa-solid fa-bag-shopping"></i>
+      </div>
+      <h1>Checkout</h1>
+      <p>Review your order and enter delivery details</p>
+    </div>
+
+    <div class="checkout-body">
+      
+      <!-- Flash Messages -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="checkout-alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+    <div class="order-summary-box">
+  <table class="order-summary-table">
+    <thead><tr><th>Item</th><th class="text-center">Qty</th><th class="text-right">Total</th></tr></thead>
+    <tbody>
+      {% for item in cart_items %}
+      <tr><td class="item-name">{{ item.product.name }}</td><td class="text-center">{{ item.qty }}</td><td class="text-right">₹{{ item.subtotal }}</td></tr>
+      {% endfor %}
+      <tr><td colspan="2">Subtotal</td><td class="text-right">₹{{ total }}</td></tr>
+      <tr><td colspan="2">Delivery Fee</td><td class="text-right" id="delivery_fee">₹25.00</td></tr>
+      <tr id="discount_row" style="display:none;"><td colspan="2" style="color:#0C831F;">Coupon Discount</td><td class="text-right" style="color:#0C831F;" id="discount_val">-₹0</td></tr>
+      <tr class="grand-total-row"><td colspan="2"><strong>Grand Total</strong></td><td class="text-right grand-total-val" id="grand_total">₹{{ total }}</td></tr>
+    </tbody>
+  </table>
+  <p id="saved_msg" style="color:#0C831F; font-weight:700; font-size:12px; margin-top:8px; display:none;"></p>
+</div>
+
+      <!-- 3. Delivery Details Form -->
+      <h2 class="section-heading">
+        <i class="fa-solid fa-location-dot" style="color:#0C831F;"></i> Delivery Details
+      </h2>
+      <form method="POST" action="{% url 'checkout' %}">
+        {% csrf_token %}
+
+        <!-- Hidden inputs to ensure backend view compatibility -->
+        <input type="hidden" id="hidden_name" name="name" value="{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}">
+        <input type="hidden" id="hidden_phone" name="phone">
+
+        <div class="form-group">
+          <label for="full_name">Full Name</label>
+          <input type="text"
+                 id="full_name"
+                 name="full_name"
+                 class="form-input"
+                 value="{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}"
+                 placeholder="Enter full name"
+                 required
+                 oninput="document.getElementById('hidden_name').value = this.value;">
+        </div>
+
+        <div class="form-group">
+          <label for="mobile">Mobile Number</label>
+          <input type="tel"
+                 id="mobile"
+                 name="mobile"
+                 class="form-input"
+                 pattern="[0-9]{10}"
+                 maxlength="10"
+                 placeholder="10-digit mobile number"
+                 required
+                 oninput="document.getElementById('hidden_phone').value = this.value;">
+        </div>
+
+        <div class="form-group">
+          <label for="address">Full Address</label>
+          <textarea id="address"
+                    name="address"
+                    rows="3"
+                    class="form-input"
+                    placeholder="House/Flat No., Building, Street, Landmark"
+                    required></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text"
+                   id="city"
+                   name="city"
+                   class="form-input"
+                   value="Rajkot"
+                   required>
+          </div>
+        </div>
+
+        <!-- 4. COD Info Box -->
+        <div class="cod-info-box">
+          <div class="cod-info-icon">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </div>
+          <div>
+            <span class="cod-info-text">Cash on Delivery - Pay cash at your doorstep</span>
+            <span class="cod-info-sub">No online prepayment needed. Keep exact change ready.</span>
+          </div>
+        </div>
+
+        <!-- 5. Place Order Button -->
+        <button type="submit" class="btn-place-order" id="place-order-btn">
+          <span>Place Order - ₹{{ total }}</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+      </form>
+
+      <a href="{% url 'cart_view' %}" class="back-cart-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Cart
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', function() {
+        const fn = document.getElementById('full_name');
+        const hn = document.getElementById('hidden_name');
+        if (fn && hn) hn.value = fn.value.trim();
+
+        const mob = document.getElementById('mobile');
+        const hp = document.getElementById('hidden_phone');
+        if (mob && hp) hp.value = mob.value.trim();
+      });
+    }
+  });
+  let baseTotal = parseFloat("{{ total }}");
+let discount = 0;
+let delivery = 25;
+
+const coupons = { 'SAVE10': 10, 'SAVE20': 20, 'FIRST50': 50 };
+
+document.getElementById('apply_coupon_btn').onclick = function(){
+  let code = document.getElementById('coupon_input').value.toUpperCase().trim();
+  let msg = document.getElementById('coupon_msg');
+  if(coupons[code]){
+    discount = Math.round(baseTotal * coupons[code] / 100);
+    msg.style.display='block'; msg.style.color='#0C831F';
+    msg.innerText = `✓ ${code} applied! ${coupons[code]}% OFF`;
+    document.getElementById('discount_row').style.display='table-row';
+    document.getElementById('discount_val').innerText = `-₹${discount}`;
+    updateTotal();
+  } else {
+    msg.style.display='block'; msg.style.color='#b91c1c'; msg.innerText='✗ Invalid coupon';
+  }
+};
+
+document.querySelectorAll('input[name="slot"]').forEach(r=>{
+  r.addEventListener('change', function(){
+    delivery = this.value === 'express'? 25 : 0;
+    document.getElementById('delivery_fee').innerText = `₹${delivery}.00`;
+    updateTotal();
+  });
+});
+
+</script>
+
+{% endblock %}

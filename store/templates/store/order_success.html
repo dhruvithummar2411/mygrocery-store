@@ -1,0 +1,91 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<style>
+  .success-page-wrap { max-width: 540px; margin: 40px auto; padding: 0 16px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  .success-card { background: #fff; border-radius: 18px; box-shadow: 0 6px 28px rgba(0,0,0,0.09); overflow: hidden; }
+  .success-header { background: linear-gradient(135deg, #0C831F 0%, #168341 100%); padding: 32px 24px 28px; text-align: center; color: #fff; }
+  .success-icon-ring { width: 72px; height: 72px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 32px; }
+  .success-header h1 { margin: 0 0 6px; font-size: 26px; font-weight: 800; }
+  .success-header p { margin: 0; font-size: 14px; opacity: 0.9; }
+  .order-info-box { margin: 20px; background: #f5f6f8; border: 1px solid #e3e6ea; border-radius: 12px; padding: 18px 20px; }
+  .order-info-box .info-title { font-size: 12px; font-weight: 700; color: #8a929e; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+  .info-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #e3e6ea; }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .info-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .icon-pay { background: #e8f5e9; color: #0C831F; } .icon-id { background: #e3f2fd; color: #1565c0; } .icon-total { background: #fff8e1; color: #e65100; } .icon-addr { background: #f3e5f5; color: #7b1fa2; }
+  .info-row .info-content { flex: 1; } .info-row .info-label { font-size: 11px; color: #9aa0a9; font-weight: 600; text-transform: uppercase; } .info-row .info-value { font-size: 14px; color: #1f2a35; font-weight: 600; margin-top: 2px; }
+  .info-row .info-value .cod-note { display: block; font-size: 12px; font-weight: 500; color: #e65100; margin-top: 2px; }
+  .info-row .info-value .total-highlight { color: #0C831F; font-size: 17px; font-weight: 800; }
+  .success-actions { padding: 4px 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .btn-success-action { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; border: none; width: 100%; }
+  .btn-view-invoice { background: #0C831F; color: #fff; } .btn-shop-again { background: #f0f2f5; color: #3c4a56; border: 1px solid #dde1e7; } .btn-whatsapp { background: #25D366; color: #fff; }
+  .success-footer-note { text-align: center; font-size: 12px; color: #9aa0a9; margin-top: 18px; }
+</style>
+
+<div class="success-page-wrap">
+  <div class="success-card">
+    <div class="success-header">
+      <div class="success-icon-ring">🎉</div>
+      <h1>Thank You!</h1>
+      <p>Your order has been confirmed. We will deliver it soon.</p>
+    </div>
+
+    <div class="order-info-box">
+      <div class="info-title">Order Summary</div>
+      <div class="info-row">
+        <div class="info-icon icon-pay"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+        <div class="info-content"><div class="info-label">Payment Mode</div><div class="info-value">Cash on Delivery <span class="cod-note">💵 Pay cash at your doorstep</span></div></div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon icon-id"><i class="fa-solid fa-hashtag"></i></div>
+        <div class="info-content"><div class="info-label">Order ID</div><div class="info-value">#{{ last_order_id }}</div></div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon icon-total"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+        <div class="info-content"><div class="info-label">Total Amount</div><div class="info-value"><span class="total-highlight">₹{{ last_order_total|floatformat:2 }}</span></div></div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon icon-addr"><i class="fa-solid fa-location-dot"></i></div>
+        <div class="info-content"><div class="info-label">Delivery Address</div><div class="info-value">{{ last_order_address }}</div></div>
+      </div>
+
+      <!-- COD STATUS - SHOW TO EVERYONE (Customer + Admin) -->
+      {% if last_order %}
+        {% if last_order.cash_collected %}
+          <div style="background:#d4edda; border:2px solid #28a745; border-radius:12px; padding:16px; margin-top:16px;">
+            <h4 style="color:#155724; margin:0 0 6px;">✅ PAID - ₹{{ last_order.cash_amount_received }} Cash Received</h4>
+            <p style="margin:0; font-size:12px;">Kab mila: {{ last_order.cash_collected_at|date:"d M Y, h:i A" }} | By: {{ last_order.cash_collected_by }}</p>
+            <span style="background:#28a745; color:white; padding:4px 10px; border-radius:6px; font-size:11px; display:inline-block; margin-top:8px;">PAID - Payment Confirmed</span>
+          </div>
+        {% else %}
+          <div style="background:#fff3cd; border:2px solid #ffc107; border-radius:12px; padding:16px; margin-top:16px;">
+            <h4 style="margin:0 0 6px;">⚠️ CASH ON DELIVERY - Amount to Collect: ₹{{ last_order_total }}</h4>
+            <p style="margin:0;"><span style="background:#ffc107; padding:2px 8px; border-radius:4px; font-size:12px;">PENDING - Cash not yet collected</span></p>
+          </div>
+        {% endif %}
+      {% endif %}
+
+      <!-- RECORD PAYMENT - ONLY FOR STAFF -->
+      {% if request.user.is_staff %}
+      {% if last_order and not last_order.cash_collected %}
+        <form method="POST" action="{% url 'record_cash_payment' last_order.id %}" style="display:flex; gap:10px; margin-top:12px;">
+          {% csrf_token %}
+          <input type="number" name="cash_amount" step="0.01" value="{{ last_order_total }}" required style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc;">
+          <button type="submit" style="background:#0d2a54; color:white; padding:10px 20px; border-radius:8px; border:none; font-weight:700;">Record Payment</button>
+        </form>
+      {% endif %}
+      {% endif %}
+
+    </div>
+
+    <div class="success-actions">
+      <a href="{% url 'bill' %}" class="btn-success-action btn-view-invoice">View Invoice / Print Bill</a>
+      <a href="{% url 'home' %}" class="btn-success-action btn-shop-again">Continue Shopping</a>
+      {% if last_order_id %}
+      <a href="https://wa.me/?text=Order%20%23{{ last_order_id }}%20confirmed%20at%20Freshora%21%20Total%3A%20%E2%82%B9{{ last_order_total|floatformat:2 }}" target="_blank" class="btn-success-action btn-whatsapp">Share Order on WhatsApp</a>
+      {% endif %}
+    </div>
+  </div>
+  <p class="success-footer-note">Your order is safe. Any questions? Give us a call.</p>
+</div>
+{% endblock %}

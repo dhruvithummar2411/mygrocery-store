@@ -1,0 +1,19 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<h2>Coupons <a href="{% url 'dashboard_add_coupon' %}" style="background:green;color:white;padding:5px 10px;">+ Add Coupon</a></h2>
+<table border="1" cellpadding="10" width="100%">
+<tr><th>Code</th><th>Discount</th><th>Min Amount</th><th>Active</th><th>Action</th></tr>
+{% for c in coupons %}
+<tr>
+<td><b>{{ c.code }}</b></td>
+<td>{{ c.discount_percent }}%</td>
+<td>₹{{ c.min_amount }}</td>
+<td>{{ c.active }}</td>
+<td>
+<a href="{% url 'dashboard_edit_coupon' c.id %}">Edit</a> | 
+<a href="{% url 'dashboard_delete_coupon' c.id %}" style="color:red;">Delete</a>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

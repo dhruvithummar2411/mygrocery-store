@@ -1,0 +1,8 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<style>
+  .delete-product-page{max-width:520px;margin:60px auto;padding:0 14px}.delete-product-card{background:#fff;border-radius:16px;box-shadow:0 6px 20px rgba(26,55,42,.1);padding:28px;text-align:center}.delete-product-card .danger-icon{width:58px;height:58px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffe2e0;color:#d62727;font-size:24px}.delete-product-card h1{margin:0 0 8px;color:#3c2828;font-size:24px}.delete-product-card p{color:#6d6464;font-size:14px}.delete-product-card strong{color:#252020}.delete-actions{display:flex;justify-content:center;gap:10px;margin-top:22px}.delete-confirm{background:#d62727;color:#fff;border:0;border-radius:8px;padding:11px 18px;font-weight:700;cursor:pointer}.delete-cancel{padding:11px 18px;border-radius:8px;border:1px solid #b9c8bd;color:#315f44;text-decoration:none;font-weight:700}
+  @media(max-width:480px){.delete-actions{flex-direction:column}.delete-confirm,.delete-cancel{width:100%;box-sizing:border-box}}
+</style>
+<div class="delete-product-page"><div class="delete-product-card"><div class="danger-icon"><i class="fa-solid fa-trash"></i></div><h1>Delete Product?</h1><p>Are you sure you want to permanently delete <strong>{{ product.name }}</strong>?</p><p>This action cannot be undone.</p><form method="post">{% csrf_token %}<div class="delete-actions"><button class="delete-confirm" type="submit"><i class="fa-solid fa-trash"></i> Yes, Delete</button><a class="delete-cancel" href="{% url 'admin_dashboard' %}">Cancel</a></div></form></div></div>
+{% endblock %}

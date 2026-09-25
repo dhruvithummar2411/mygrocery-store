@@ -1,0 +1,71 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<style>
+  .invoice-wrap{max-width:720px;margin:30px auto;background:#fff;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:32px;font-family:'Segoe UI',sans-serif}
+  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0C831F;padding-bottom:16px;margin-bottom:20px}
+  .inv-logo{font-size:22px;font-weight:800;color:#0C831F}
+  .inv-meta{text-align:right;font-size:13px;line-height:1.6;color:#333}
+  .inv-table{width:100%;border-collapse:collapse;margin:20px 0}
+  .inv-table th{background:#f5f6f8;padding:12px 10px;font-size:12px;text-transform:uppercase;color:#666;border:1px solid #e3e6ea}
+  .inv-table td{padding:12px 10px;border:1px solid #eee;font-size:14px;text-align:center}
+  .inv-table td:first-child{text-align:left}
+  .totals-box{margin-left:auto;width:260px;text-align:right;margin-top:10px}
+  .totals-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+  .grand{font-weight:800;color:#0C831F;font-size:16px;border-top:2px solid #0C831F;margin-top:6px;padding-top:8px}
+  .cod-box{margin-top:24px;border-radius:12px;padding:16px}
+  .cod-pending{background:#fff3cd;border:2px solid #ffc107}
+  .cod-paid{background:#d4edda;border:2px solid #28a745}
+  @media print{.no-print{display:none} .invoice-wrap{box-shadow:none;border:none}}
+</style>
+
+<div class="invoice-wrap">
+  <div class="inv-header">
+    <div><div class="inv-logo">🌿 Freshora</div><div style="font-size:12px;color:#888">Fresh Dairy & Grocery</div></div>
+    <div class="inv-meta">
+      <b>Order ID #{{ order.id }}</b><br>
+      Date: {{ order.created_at|date:"d M Y, h:i A" }}<br>
+      {{ order.address }}, {{ order.city }}
+    </div>
+  </div>
+
+  <table class="inv-table">
+    <tr><th>Product</th><th>Qty</th><th>Your Price</th><th>Subtotal</th></tr>
+    {% for item in order.items.all %}
+    <tr><td>{{ item.product_name }}</td><td>{{ item.qty }}</td><td>₹{{ item.bill_price|default:item.price }}</td><td>₹{{ item.total }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <div class="totals-box">
+    <div class="totals-row"><span>Subtotal</span><span>₹{{ order.total }}</span></div>
+    {% if order.discount_code %}<div class="totals-row" style="color:green"><span>Discount ({{ order.discount_code }})</span><span>Applied</span></div>{% endif %}
+    <div class="totals-row grand"><span>Grand Total</span><span>₹{{ order.total }}</span></div>
+  </div>
+
+  {% if order.cash_collected %}
+    <div class="cod-box cod-paid">
+      <h4 style="margin:0;color:#155724">✅ PAID - ₹{{ order.cash_amount_received }} Collected</h4>
+      <p style="margin:6px 0 0;font-size:12px">At {{ order.cash_collected_at|date:"d M Y, h:i A" }} by {{ order.cash_collected_by }}</p>
+    </div>
+  {% else %}
+    <div class="cod-box cod-pending">
+      <h4 style="margin:0">💰 CASH ON DELIVERY - Amount to Collect: ₹{{ order.total }}</h4>
+      <span style="background:#ffc107;padding:3px 8px;border-radius:4px;font-size:11px">PENDING - Cash not yet collected</span>
+    </div>
+  {% endif %}
+
+  {% if request.user.is_staff %}
+  {% if not order.cash_collected %}
+  <form method="POST" action="{% url 'record_cash_payment' order.id %}" class="no-print" style="display:flex;gap:10px;margin-top:14px">
+    {% csrf_token %}
+    <input type="number" name="cash_amount" step="0.01" value="{{ order.total }}" required style="flex:1;padding:10px;border-radius:8px;border:1px solid #ccc">
+    <button style="background:#0d2a54;color:#fff;padding:10px 18px;border-radius:8px;border:none;font-weight:700">Record Payment</button>
+  </form>
+  {% endif %}
+  {% endif %}
+
+  <div class="no-print" style="display:flex;gap:10px;margin-top:20px">
+    <a href="{% url 'home' %}" style="flex:1;text-align:center;background:#f0f2f5;padding:12px;border-radius:10px;text-decoration:none;color:#333;font-weight:700">← Continue Shopping</a>
+    <button onclick="window.print()" style="flex:1;background:#0C831F;color:#fff;padding:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer">🖨️ Print Bill</button>
+  </div>
+</div>
+{% endblock %}

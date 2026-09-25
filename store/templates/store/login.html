@@ -1,0 +1,56 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div style="max-width:400px; margin:50px auto; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); background:#fff;">
+    <h2 style="text-align:center; color:#007bff; margin-bottom:20px;">Login</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">Username</label>
+            <input type="text" name="username" placeholder="Enter your username" required style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:14px;">
+        </div>
+        <div style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                <label style="font-weight:bold; margin-bottom:0;">Password</label>
+                <a href="{% url 'forgot_password' %}" style="color:#007bff; font-size:13px; text-decoration:none;">Forgot Password?</a>
+            </div>
+            <div style="position:relative;">
+                <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required style="width:100%; padding:10px 40px 10px 12px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:14px;">
+                <span id="toggleLoginPassword" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#777; font-size:15px; user-select:none;" title="Show/Hide Password">
+                    <i class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+        </div>
+
+        <button type="submit" style="width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:6px; font-size:16px; font-weight:600; cursor:pointer; margin-top:10px;">
+            Login
+        </button>
+    </form>
+    
+    <div style="text-align:center; margin-top:18px; font-size:14px;">
+        <span>New User? <a href="{% url 'register' %}" style="color:#007bff; font-weight:600; text-decoration:none;">Register Here</a></span>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggleLoginPassword');
+    const pwdInput = document.getElementById('loginPassword');
+    if (toggleBtn && pwdInput) {
+        toggleBtn.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                pwdInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

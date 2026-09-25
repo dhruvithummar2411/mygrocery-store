@@ -1,0 +1,8 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div style="max-width:420px;margin:50px auto;background:#fff;padding:24px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1)">
+  <h2>Edit Category</h2>
+  <form method="post">{% csrf_token %}<label>Category name</label><input name="name" value="{{ category.name }}" required style="width:100%;box-sizing:border-box;padding:10px;margin:10px 0 14px"><button type="submit" style="width:100%;padding:10px;background:#1677d2;color:white;border:0;border-radius:6px">Save Changes</button></form>
+  <a href="{% url 'admin_dashboard' %}" style="display:block;margin-top:14px;text-align:center">Cancel</a>
+</div>
+{% endblock %}

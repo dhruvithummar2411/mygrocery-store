@@ -1,0 +1,494 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .bills-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .bills-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5ede7;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .bills-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .bills-header-icon {
+    width: 44px;
+    height: 44px;
+    background: #e8f5e9;
+    color: #0C831F;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .bills-title {
+    margin: 0;
+    color: #1a3d24;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .bills-subtitle {
+    margin: 3px 0 0;
+    color: #6a7c70;
+    font-size: 13px;
+  }
+
+  .bills-count-badge {
+    background: #0C831F;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* Bill Card */
+  .bill-card {
+    background: #ffffff;
+    border: 1px solid #dce8df;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .bill-card:hover {
+    box-shadow: 0 6px 18px rgba(12, 131, 31, 0.08);
+  }
+
+  .bill-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf3ee;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .bill-id-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .bill-number {
+    font-size: 17px;
+    font-weight: 700;
+    color: #143e22;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bill-date {
+    font-size: 12px;
+    color: #728478;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .bill-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-ordered { background: #e3f2fd; color: #1565c0; }
+  .status-packed { background: #fff3e0; color: #e65100; }
+  .status-shipped { background: #f3e5f5; color: #7b1fa2; }
+  .status-delivered { background: #e8f5e9; color: #2e7d32; }
+
+  /* Items summary */
+  .bill-items-summary {
+    padding: 14px 0;
+    border-bottom: 1px solid #edf3ee;
+  }
+
+  .bill-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .bill-items-table th {
+    text-align: left;
+    color: #63776a;
+    font-weight: 600;
+    padding: 4px 0;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+
+  .bill-items-table td {
+    padding: 6px 0;
+    color: #2b3e31;
+  }
+
+  .bill-items-table td.qty-col {
+    text-align: center;
+    width: 60px;
+    color: #617368;
+  }
+
+  .bill-items-table td.price-col {
+    text-align: right;
+    font-weight: 600;
+    width: 100px;
+  }
+
+  /* Financial row */
+  .bill-card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .bill-amount-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .amount-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .amount-label {
+    font-size: 11px;
+    color: #7b8e81;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .amount-val {
+    font-size: 15px;
+    font-weight: 700;
+    color: #173b23;
+  }
+
+  .amount-val.total {
+    font-size: 17px;
+    color: #0C831F;
+  }
+
+  .amount-val.due {
+    color: #d32f2f;
+  }
+
+  .paid-badge {
+    background: #e8f5e9;
+    color: #0C831F;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .due-badge {
+    background: #ffebee;
+    color: #c62828;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Action Buttons */
+  .bill-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border: 1px solid transparent;
+  }
+
+  .btn-view {
+    background: #f1f8f3;
+    color: #0C831F;
+    border-color: #bfe1c6;
+  }
+
+  .btn-view:hover {
+    background: #0C831F;
+    color: #ffffff;
+    border-color: #0C831F;
+  }
+
+  .btn-download {
+    background: #0C831F;
+    color: #ffffff;
+  }
+
+  .btn-download:hover {
+    background: #096818;
+    color: #ffffff;
+  }
+
+  .btn-delete {
+    background: #fff3f3;
+    color: #d32f2f;
+    border-color: #f9cece;
+  }
+
+  .btn-delete:hover {
+    background: #d32f2f;
+    color: #ffffff;
+    border-color: #d32f2f;
+  }
+
+  /* Empty State */
+  .empty-bills-box {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #dce8df;
+    border-radius: 18px;
+    padding: 55px 24px;
+    margin: 20px 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .empty-icon {
+    width: 76px;
+    height: 76px;
+    background: #f0f7f2;
+    color: #0C831F;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    margin: 0 auto 18px;
+  }
+
+  .empty-title {
+    margin: 0 0 8px;
+    color: #173e23;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .empty-desc {
+    margin: 0 0 24px;
+    color: #687e70;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .btn-shop-now {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #0C831F;
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    transition: background 0.2s ease;
+  }
+
+  .btn-shop-now:hover {
+    background: #096818;
+  }
+
+  @media (max-width: 600px) {
+    .bills-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .bill-card-top {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .bill-card-bottom {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .bill-actions {
+      justify-content: stretch;
+    }
+    .action-btn {
+      flex: 1;
+    }
+  }
+</style>
+
+<div class="bills-container">
+  <div class="bills-header">
+    <div class="bills-header-left">
+      <div class="bills-header-icon">
+        <i class="fa-solid fa-receipt"></i>
+      </div>
+      <div>
+        <h1 class="bills-title">My Bills</h1>
+        <p class="bills-subtitle">View, download, or manage your order invoices</p>
+      </div>
+    </div>
+    {% if orders %}
+    <span class="bills-count-badge">{{ orders|length }} Bill{{ orders|length|pluralize }}</span>
+    {% endif %}
+  </div>
+
+  {% for order in orders %}
+  <div class="bill-card" id="bill-card-{{ order.id }}">
+    <div class="bill-card-top">
+      <div class="bill-id-group">
+        <span class="bill-number">
+          <i class="fa-solid fa-file-invoice" style="color:#0C831F;"></i>
+          Bill #{{ order.id }}
+          {% if order.customer_name and order.customer_name != 'Guest' %}
+            <span style="font-size:13px; font-weight:500; color:#5b7062;">({{ order.customer_name }})</span>
+          {% endif %}
+        </span>
+        <span class="bill-date">
+          <i class="fa-regular fa-calendar"></i>
+          {{ order.created_at|date:"d M Y, h:i A" }}
+        </span>
+      </div>
+      <div>
+        <span class="bill-status status-{{ order.status|lower }}">{{ order.status }}</span>
+      </div>
+    </div>
+
+    <div class="bill-items-summary">
+      <table class="bill-items-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="qty-col">Qty</th>
+            <th class="price-col">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order.items.all %}
+          <tr>
+            <td>{{ item.product_name }}</td>
+            <td class="qty-col">{{ item.qty }}</td>
+            <td class="price-col">₹{{ item.bill_price }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" style="color:#888; font-style:italic;">No item details available</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bill-card-bottom">
+      <div class="bill-amount-summary">
+        <div class="amount-item">
+          <span class="amount-label">Total Amount</span>
+          <span class="amount-val total">₹{{ order.total_amount }}</span>
+        </div>
+        <div class="amount-item">
+          <span class="amount-label">Paid</span>
+          <span class="amount-val">₹{{ order.paid_amount }}</span>
+        </div>
+        <div class="amount-item">
+          <span class="amount-label">Payment</span>
+          {% if order.is_paid %}
+            <span class="paid-badge"><i class="fa-solid fa-circle-check"></i> PAID</span>
+          {% else %}
+            <span class="due-badge"><i class="fa-solid fa-clock"></i> PENDING</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="bill-actions">
+        <!-- View Button -->
+        <a href="{% url 'bill_detail' order.id %}" class="action-btn btn-view" title="View bill details">
+          <i class="fa-solid fa-eye"></i> View
+        </a>
+
+        <!-- Download Button -->
+        <a href="{% url 'bill_detail' order.id %}?download=true" target="_blank" class="action-btn btn-download" title="Download bill as PDF">
+          <i class="fa-solid fa-download"></i> Download
+        </a>
+
+        {% comment %} DELETE BUTTON DISABLED — Customer se permanently delete nahi hona chahiye
+        <form action="{% url 'delete_bill' order.id %}" method="post" onsubmit="return confirm('Are you sure you want to delete Bill #{{ order.id }}? It will be deleted from both My Orders and My Bills.');" style="display:inline; margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="action-btn btn-delete" title="Delete this bill">
+            <i class="fa-solid fa-trash-can"></i> Delete
+          </button>
+        </form>
+        {% endcomment %}
+      </div>
+    </div>
+  </div>
+
+  {% empty %}
+  <div class="empty-bills-box">
+    <div class="empty-icon">
+      <i class="fa-solid fa-receipt"></i>
+    </div>
+    <h2 class="empty-title">No Previous Bills</h2>
+    <p class="empty-desc">
+      You haven't placed any orders yet, so there are no invoices to display.<br>
+      Explore our store to find great products and place your first order!
+    </p>
+    {% if not user.is_authenticated %}
+    <p style="font-size:13px; color:#5c7063; margin-bottom:18px;">
+      Already placed an order earlier? <a href="{% url 'login' %}" style="color:#0C831F; font-weight:700;">Login</a> to view your previous bills.
+    </p>
+    {% endif %}
+    <a href="{% url 'home' %}" class="btn-shop-now">
+      <i class="fa-solid fa-cart-shopping"></i> Start Shopping
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+

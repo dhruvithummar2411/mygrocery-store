@@ -1,0 +1,972 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .product-detail-page {
+    max-width: 1120px;
+    margin: 28px auto 50px;
+    padding: 0 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .detail-breadcrumb {
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #15803d;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    transition: all 0.15s ease;
+  }
+
+  .back-home-btn:hover {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .detail-card-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    padding: 36px 32px;
+    display: grid;
+    grid-template-columns: 370px minmax(0, 1fr);
+    gap: 36px;
+    align-items: start;
+    box-sizing: border-box;
+  }
+
+  /* Left Column: Big Product Image */
+  .detail-image-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .detail-image-box {
+    width: 350px;
+    height: 350px;
+    max-width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+
+  .detail-image-box img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  .detail-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 64px;
+    background: #f8fafc;
+    border-radius: 10px;
+  }
+
+  .detail-fast-delivery {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    background: #f0fdf4;
+    color: #16a34a;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #bbf7d0;
+  }
+
+  /* Right Column: Info & Actions */
+  .detail-info-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .detail-kicker {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: -8px;
+  }
+
+  .detail-product-name {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+  }
+
+  .detail-stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    width: fit-content;
+  }
+
+  .detail-stock-badge.in-stock {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+
+  .detail-stock-badge.out-of-stock {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+
+  .detail-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .detail-price-big {
+    font-size: 34px;
+    font-weight: 850;
+    color: #0f172a;
+  }
+
+  .detail-price-cut {
+    font-size: 18px;
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-weight: 500;
+  }
+
+  .detail-discount-pill {
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .detail-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .detail-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .detail-select {
+    width: 100%;
+    max-width: 360px;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+  }
+
+  .detail-select:focus {
+    border-color: #0c831f;
+    box-shadow: 0 0 0 3px rgba(12, 131, 31, 0.1);
+  }
+
+  .detail-desc-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .detail-desc-heading {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin: 0;
+  }
+
+  .detail-desc-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #475569;
+    margin: 0;
+  }
+
+  /* Bottom Buttons Side by Side */
+  .detail-actions-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    padding-top: 18px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .btn-add-cart-detail {
+    flex: 1;
+    min-height: 48px;
+    background: #ff9f00;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(255, 159, 0, 0.3);
+  }
+
+  .btn-add-cart-detail:hover {
+    background: #f39700;
+  }
+
+  .btn-buy-now-detail {
+    flex: 1;
+    min-height: 48px;
+    background: #fb641b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(251, 100, 27, 0.3);
+  }
+
+  .btn-buy-now-detail:hover {
+    background: #e85611;
+  }
+
+  /* --- Half Star Rating Styles --- */
+  .rating-summary-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 10px;
+    flex-wrap: wrap;
+  }
+
+  .rating-stars-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fefce8;
+    border: 1px solid #fef08a;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .stars-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .star-gold {
+    color: #eab308;
+  }
+
+  .star-half-wrap {
+    position: relative;
+    display: inline-block;
+    color: #e2e8f0;
+    line-height: 1;
+  }
+
+  .star-half-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    overflow: hidden;
+    color: #eab308;
+  }
+
+  .star-empty {
+    color: #cbd5e1;
+  }
+
+  .rating-score-num {
+    font-size: 14px;
+    font-weight: 800;
+    color: #854d0e;
+    margin-left: 2px;
+  }
+
+  .rating-count-text {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  /* Rating & Reviews Section */
+  .reviews-section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    padding: 30px 32px;
+    margin-top: 28px;
+  }
+
+  .reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .reviews-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rate-form-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+
+  .rate-form-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .rate-select-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .rate-select {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+    font-weight: 700;
+    color: #854d0e;
+    background: #ffffff;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .rate-textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #1e293b;
+    box-sizing: border-box;
+    outline: none;
+    margin-bottom: 12px;
+    resize: vertical;
+  }
+
+  .btn-submit-rating {
+    background: #0c831f;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+  }
+
+  .btn-submit-rating:hover {
+    background: #096818;
+  }
+
+  .review-item {
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .review-item:last-child {
+    border-bottom: none;
+  }
+
+  .review-user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .review-username {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .review-date {
+    font-size: 11px;
+    color: #94a3b8;
+  }
+
+  .review-text {
+    font-size: 13px;
+    color: #475569;
+    margin: 4px 0 0;
+    line-height: 1.5;
+  }
+
+  /* --- Flash Sale & Hot Deal Styles --- */
+  @keyframes neonGlow {
+    0% {
+      border-color: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4), inset 0 0 6px rgba(239, 68, 68, 0.2);
+    }
+    50% {
+      border-color: #dc2626;
+      box-shadow: 0 0 18px rgba(220, 38, 38, 0.75), inset 0 0 10px rgba(220, 38, 38, 0.35);
+    }
+    100% {
+      border-color: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4), inset 0 0 6px rgba(239, 68, 68, 0.2);
+    }
+  }
+
+  .flash-deal-card {
+    border: 2px solid #ef4444 !important;
+    animation: neonGlow 2s infinite ease-in-out;
+  }
+
+  .flash-deal-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+    border: 1.5px solid #fca5a5;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 8px 0 14px 0;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .flash-left-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .hot-deal-badge {
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35);
+  }
+
+  .flash-discount-badge {
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+
+  .flash-stock-left {
+    font-size: 12px;
+    font-weight: 700;
+    color: #b91c1c;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .flash-timer-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #111111;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    border: 1px solid #333333;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  .flash-timer-box i {
+    color: #ef4444;
+    font-size: 13px;
+  }
+
+  .flash-timer-text {
+    color: #ffffff;
+  }
+
+  .flash-timer-box.ended {
+    background: #3f3f46;
+    color: #f43f5e;
+  }
+
+  /* Responsive: stack vertically */
+  @media (max-width: 768px) {
+    .detail-card-container {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 22px 18px;
+    }
+
+    .detail-image-box {
+      width: 100%;
+      height: 320px;
+    }
+
+    .detail-product-name {
+      font-size: 23px;
+    }
+
+    .detail-price-big {
+      font-size: 28px;
+    }
+
+    .detail-select {
+      max-width: 100%;
+    }
+
+    .detail-actions-row {
+      flex-direction: row;
+    }
+
+    .reviews-section {
+      padding: 20px 18px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .detail-actions-row {
+      flex-direction: column;
+    }
+  }
+
+
+  .variant-buttons{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
+  .variant-btn{padding:9px 16px; border:1.5px solid #ddd; border-radius:8px; background:#fff; cursor:pointer;}
+  .variant-btn.active{border:2px solid #007185; background:#e8f0fe; color:#007185; font-weight:600;}
+</style>
+
+<div class="product-detail-page">
+  <div class="detail-breadcrumb">
+    <a href="{% url 'home' %}" class="back-home-btn">
+      <i class="fa-solid fa-arrow-left"></i> Back to Home
+    </a>
+  </div>
+
+  <div class="detail-card-container {% if product.is_flash_deal %}flash-deal-card{% endif %}">
+    <!-- Left Column: Big Product Image (350px with border) -->
+    <div class="detail-image-column">
+      <div class="detail-image-box">
+        <a href="{% url 'add_to_wishlist' product.id %}" class="wishlist-btn" data-id="{{ product.id }}" title="Wishlist">
+          {% if product.id in wishlist_product_ids %}
+            <i class="fa-solid fa-heart" style="color:#ef4444;"></i>
+          {% else %}
+            <i class="fa-regular fa-heart"></i>
+          {% endif %}
+        </a>
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+          <div class="detail-image-placeholder">
+            <i class="fa-solid fa-basket-shopping"></i>
+          </div>
+        {% endif %}
+      </div>
+      <div class="detail-fast-delivery">
+        <i class="fa-solid fa-bolt"></i> Delivery in {{ product.delivery_time|default:"10 MINS" }}
+      </div>
+    </div>
+
+    <!-- Right Column: Product Details & Purchase Form -->
+    <div class="detail-info-column">
+      {% if product.category %}
+        <div class="detail-kicker">{{ product.category.name }}{% if product.subcategory %} / {{ product.subcategory.name }}{% endif %}</div>
+      {% endif %}
+
+      <h1 class="detail-product-name">{{ product.name }}</h1>
+
+      <!-- Rating summary with half-star display -->
+      <div class="rating-summary-row">
+        <div class="rating-stars-badge">
+          <div class="stars-display">
+            {% with b=product.stars_breakdown %}
+              {% for i in b.full %}
+                <span class="star-gold">★</span>
+              {% endfor %}
+              {% if b.half %}
+                <span class="star-half-wrap">
+                  <span class="star-empty">★</span>
+                  <span class="star-half-fill">★</span>
+                </span>
+              {% endif %}
+              {% for i in b.empty %}
+                <span class="star-empty">★</span>
+              {% endfor %}
+            {% endwith %}
+          </div>
+          <span class="rating-score-num">{{ product.average_rating }}</span>
+        </div>
+        <span class="rating-count-text">({{ product.rating_count }} rating{% if product.rating_count != 1 %}s{% endif %})</span>
+      </div>
+
+      {% if product.is_flash_deal %}
+      <!-- ⚡ FLASH DEAL BANNER: HOT DEAL badge, Only 12 left, 10% OFF, Black Timer Box -->
+      <div class="flash-deal-banner" id="flash-deal-banner">
+        <div class="flash-left-meta">
+          <span class="hot-deal-badge">🔥 HOT DEAL</span>
+          <span class="flash-discount-badge">10% OFF</span>
+          <span class="flash-stock-left"><i class="fa-solid fa-fire"></i> Only 12 left</span>
+        </div>
+        <div class="flash-timer-box" id="flash-timer-box">
+          <i class="fa-regular fa-clock"></i>
+          <span class="flash-timer-text" id="flash-timer-countdown">10:00</span>
+        </div>
+      </div>
+      {% endif %}
+
+      <div>
+        {% if product.stock > 0 %}
+          <span class="detail-stock-badge in-stock">
+            <i class="fa-solid fa-circle-check"></i> Stock: {{ product.stock }} available
+          </span>
+        {% else %}
+          <span class="detail-stock-badge out-of-stock">
+            <i class="fa-solid fa-triangle-exclamation"></i> Out of Stock
+          </span>
+        {% endif %}
+      </div>
+
+      <div style="margin:15px 0;">
+        {% if product.variants.all %}
+        <p>Size: <b id="selected-size">{{ product.variants.first.name }}</b></p>
+        <div class="variant-buttons">
+          {% for v in product.variants.all %}
+          <button type="button" class="variant-btn {% if forloop.first %}active{% endif %}" data-price="{{ v.price }}" data-name="{{ v.name }}" data-id="{{ v.id }}">{{ v.name }} / Pouch</button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <p style="font-size:26px; font-weight:700;">
+      {% if deal_active and not deal_ended %}
+        ₹<span id="product-price">{{ discounted_price }}</span> <small style="font-size:14px; color:#16a34a; font-weight:600;">{{ product.price }} OFF</small>
+      {% else %}
+        ₹<span id="product-price">{{ selected_variant_price }}</span>
+      {% endif %}
+      </p>
+
+      <input type="hidden" id="selected-variant-id" value="{{ product.variants.first.id }}">
+
+      {% if product.description %}
+      <!-- Full description -->
+      <div class="detail-desc-box">
+        <h3 class="detail-desc-heading"><i class="fa-solid fa-align-left"></i> Product Description</h3>
+        <p class="detail-desc-text">
+          {{ product.description }}
+        </p>
+      </div>
+      {% endif %}
+
+      <div style="display:flex; gap:12px; margin-top:20px;">
+        <button id="add-to-cart-btn" data-product="{{ product.id }}" style="flex:1; background:#ffd814; border:1px solid #fcd200; padding:12px; border-radius:20px; font-weight:600; cursor:pointer;">
+          Add to Cart
+        </button>
+        <button id="buy-now-btn" style="flex:1; background:#ffa41c; border:1px solid #ff8f00; padding:12px; border-radius:20px; font-weight:600; color:white; cursor:pointer;">
+          Buy Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ratings & Customer Reviews Section -->
+  <div class="reviews-section">
+    <div class="reviews-header">
+      <h2 class="reviews-title">
+        <i class="fa-solid fa-star star-gold"></i> Ratings & Customer Reviews
+      </h2>
+      <div class="rating-stars-badge">
+        <span class="rating-score-num" style="font-size:16px;">{{ product.average_rating }} ★</span>
+        <span class="rating-count-text">Based on {{ product.rating_count }} review{% if product.rating_count != 1 %}s{% endif %}</span>
+      </div>
+    </div>
+
+    <!-- Rating Form (0.5 - 5.0) -->
+    <div class="rate-form-card">
+      <div class="rate-form-title">
+        <i class="fa-solid fa-pen-to-square" style="color:#0c831f;"></i>
+        {% if user_rating %}
+          Update Your Rating
+        {% else %}
+          Rate This Product
+        {% endif %}
+      </div>
+
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'rate_product' product.id %}">
+          {% csrf_token %}
+          <div class="rate-select-group">
+            <label for="rating-choice" style="font-size:13px; font-weight:700; color:#475569;">Select Rating:</label>
+            <select name="rating" id="rating-choice" class="rate-select" required>
+              {% for val in rating_choices %}
+                <option value="{{ val }}" {% if user_rating and user_rating.rating == val %}selected{% elif not user_rating and val == 5.0 %}selected{% endif %}>
+                  {{ val }} ★
+                </option>
+              {% endfor %}
+            </select>
+            {% if user_rating %}
+              <span style="font-size:12px; color:#16a34a; font-weight:600;">(You previously rated this {{ user_rating.rating }}★)</span>
+            {% endif %}
+          </div>
+          <textarea name="review" class="rate-textarea" rows="2" placeholder="Write a brief review (optional)...">{% if user_rating and user_rating.review %}{{ user_rating.review }}{% endif %}</textarea>
+          <button type="submit" class="btn-submit-rating">
+            <i class="fa-solid fa-paper-plane"></i> Submit Rating
+          </button>
+        </form>
+      {% else %}
+        <p style="font-size:13px; color:#64748b; margin:6px 0 10px;">
+          Please log in to rate this product and leave a review.
+        </p>
+        <a href="{% url 'login' %}?next={{ request.path|urlencode }}" class="btn-submit-rating" style="text-decoration:none; display:inline-flex;">
+          <i class="fa-solid fa-right-to-bracket"></i> Login to Rate
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Recent Reviews List -->
+    {% if recent_ratings %}
+      <div style="margin-top:16px;">
+        <h4 style="font-size:14px; font-weight:700; color:#334155; margin-bottom:12px;">Recent Reviews</h4>
+        {% for r in recent_ratings %}
+          <div class="review-item">
+            <div class="review-user-row">
+              <div class="review-username">
+                <i class="fa-regular fa-user" style="margin-right:4px; color:#94a3b8;"></i>
+                {{ r.user.username }}
+                <span class="star-gold" style="margin-left:6px; font-weight:800;">{{ r.rating }} ★</span>
+              </div>
+              <div class="review-date">{{ r.created_at|date:"d M Y" }}</div>
+            </div>
+            {% if r.review %}
+              <p class="review-text">{{ r.review }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  //@ts-nocheck
+  // Update price display when variant selection changes
+  const variantSelect = document.getElementById('variant-select');
+  const priceDisplay = document.getElementById('detail-price-display');
+  const cutDisplay = document.getElementById('detail-cut-display');
+
+  if (variantSelect && priceDisplay) {
+    function updatePrice() {
+      const selected = variantSelect.options[variantSelect.selectedIndex];
+      if (!selected) return;
+      const price = selected.getAttribute('data-price');
+      const cut = selected.getAttribute('data-cut');
+
+      if (price) {
+        priceDisplay.textContent = '₹' + price;
+      }
+      if (cutDisplay) {
+        if (cut && cut !== 'None' && cut !== '') {
+          cutDisplay.textContent = '₹' + cut;
+          cutDisplay.style.display = 'inline';
+        } else {
+          cutDisplay.style.display = 'none';
+        }
+      }
+    }
+
+    variantSelect.addEventListener('change', updatePrice);
+    // Initialize price on page load if variant selected
+    updatePrice();
+  }
+
+  // --- Flash Sale Countdown Timer (10:00 to 0) ---
+  {% if product.is_flash_deal %}
+  (function() {
+    const timerText = document.getElementById('flash-timer-countdown');
+    const timerBox = document.getElementById('flash-timer-box');
+    const addBtn = document.querySelector('.btn-add-cart-detail');
+    const buyBtn = document.querySelector('.btn-buy-now-detail');
+    const addForm = document.getElementById('detail-add-form');
+
+    // Default duration 10 minutes (600 seconds)
+    let totalSeconds = 600;
+
+    {% if product.flash_end_time %}
+    // If a server end time is set, compute remaining seconds
+    const endTime = new Date("{{ product.flash_end_time|date:'c' }}").getTime();
+    const now = new Date().getTime();
+    if (!isNaN(endTime)) {
+      totalSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+    }
+    {% endif %}
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    function onDealEnded() {
+      if (timerText) timerText.innerText = "Deal Ended";
+      if (timerBox) timerBox.classList.add('ended');
+    }
+
+    if (totalSeconds <= 0) {
+      onDealEnded();
+      return;
+    }
+
+    if (timerText) timerText.innerText = formatTime(totalSeconds);
+
+    const interval = setInterval(function() {
+      totalSeconds--;
+      if (totalSeconds <= 0) {
+        clearInterval(interval);
+        onDealEnded();
+      } else {
+        if (timerText) timerText.innerText = formatTime(totalSeconds);
+      }
+    }, 1000);
+  })();
+  {% endif %}
+
+  // Variant buttons click handling
+  document.querySelectorAll('.variant-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const sizeEl = document.getElementById('selected-size');
+      if (sizeEl) sizeEl.innerText = this.dataset.name;
+      const priceEl = document.getElementById('product-price');
+      if (priceEl) priceEl.innerText = this.dataset.price;
+      const varInput = document.getElementById('selected-variant-id');
+      if (varInput) varInput.value = this.dataset.id;
+    });
+  });
+
+  const addBtn = document.getElementById('add-to-cart-btn');
+  if (addBtn) {
+    addBtn.onclick = function() {
+      let vid = document.getElementById('selected-variant-id')?.value || '';
+      window.location.href = `/cart/add/${this.dataset.product}/?variant_id=${vid}`;
+    };
+  }
+
+  const buyBtn = document.getElementById('buy-now-btn');
+  if (buyBtn) {
+    buyBtn.onclick = function() {
+      let vid = document.getElementById('selected-variant-id')?.value || '';
+      let pid = document.getElementById('add-to-cart-btn')?.dataset.product || '{{ product.id }}';
+      window.location.href = `/cart/add/${pid}/?variant_id=${vid}&next=/checkout/`;
+    };
+  }
+</script>
+{% endblock %}

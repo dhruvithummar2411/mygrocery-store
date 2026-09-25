@@ -1,0 +1,380 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>Freshora – by DailyDrop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{% static 'css/style.css' %}?v=6">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" type="image/png" href="{% static 'css/images/logo.png' %}">
+
+</head>
+<body>
+<div class="main-container">
+  <header class="top-header">
+    <!-- LOGO START -->
+    <a href="{% url 'home' %}" style="display:flex; align-items:center; text-decoration:none;">
+      <img src="{% static 'images/logo.jpeg' %}" alt="Freshora" style="height:45px;">
+    </a>
+    <div class="search-area">
+      <form method="get" action="{% url 'home' %}">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search for atta, milk, fruits...">
+      </form>
+    </div>
+    <div class="nav-icons">
+      <a href="{% url 'home' %}" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="{% url 'cart_view' %}" class="nav-item cart-icon"><i class="fa-solid fa-cart-shopping"></i> Cart{% if cart_total and cart_total > 0 %}<span class="badge">{{ cart_total }}</span>{% endif %}</a>
+      {% if is_customer_logged_in %}
+        <a href="{% url 'wishlist_view' %}" class="nav-item wishlist-icon">
+           <i class="fa-solid fa-heart" style="color: #ff6b6b;"></i>
+           <span>Wishlist</span>
+           <span class="badge" id="wishlist-count" {% if not wishlist_count or wishlist_count == 0 %}style="display:none;"{% endif %}>{{ wishlist_count|default:0 }}</span>
+        </a>
+        <a href="{% url 'my_orders' %}" class="nav-item"><i class="fa-solid fa-box"></i> My Orders</a>
+        <a href="{% url 'my_bills' %}" class="nav-item"><i class="fa-solid fa-receipt"></i> My Bills</a>
+        <div class="nav-item profile" id="profileWrap">
+          <div class="profile-trigger">
+            <i class="fa-solid fa-user"></i>
+            <span class="profile-username">{{ customer_user.username|default:user.username }}</span>
+            <i class="fa-solid fa-caret-down" style="font-size:11px; margin-left:2px; margin-bottom:0;"></i>
+          </div>
+          <div class="profile-dropdown">
+            <form method="post" action="{% url 'customer_logout' %}" style="margin:0; padding:0;">
+              {% csrf_token %}
+              <button type="submit" class="dropdown-logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <a href="{% url 'login' %}" class="nav-item"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+        <a href="{% url 'register' %}" class="nav-item"><i class="fa-solid fa-user-plus"></i> Register</a>
+      {% endif %}
+    </div>
+  </header>
+
+{% if messages %}
+<div style="max-width:1200px; margin:12px auto 0; padding:0 15px;">
+  {% for message in messages %}
+    <div style="background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9; padding:10px 16px; border-radius:8px; font-size:14px; font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+      <i class="fa-solid fa-circle-check"></i> {{ message }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if save10_coupon %}
+<div class="save10-banner" style="display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap;">
+  <span><i class="fa-solid fa-tag"></i> 10% OFF on orders above ₹500 - Code: <strong>SAVE10</strong></span>
+  <span style="display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.18); padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:0.3px; border:1px solid rgba(255,255,255,0.35);">
+    💵 COD Available &nbsp;·&nbsp; No Advance Payment
+  </span>
+</div>
+{% else %}
+<div style="background:#0c831f; color:white; text-align:center; padding:7px 15px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap;">
+  <span style="display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.18); padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:0.3px; border:1px solid rgba(255,255,255,0.35);">
+    💵 COD Available &nbsp;·&nbsp; No Advance Payment
+  </span>
+</div>
+{% endif %}
+
+
+  <main class="page-content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<div class="wave-footer-wrap">
+  <svg viewBox="0 0 1440 90" style="width:100%; height:65px; display:block;" preserveAspectRatio="none">
+    <path d="M0,20 C360,80 720,5 1080,40 C1260,60 1380,45 1440,20 L1440,90 L0,90 Z" fill="#249a1f"/>
+    <path d="M0,38 Q360,78 720,38 T1440,38" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  </svg>
+</div>
+
+<footer class="site-footer" style="background:#249a1f; color:white; padding:25px 20px 10px 20px; margin-top:-2px; font-family: Arial, sans-serif;">
+  <div class="footer-grid" style="display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:30px; max-width:1200px; margin:auto;">
+    
+    <!-- Column 1 -->
+    <div>
+      <h3 style="margin:0; font-size:22px;">🌿 Freshora</h3>
+      <span style="font-size:11px; color:#d4f5d4; font-weight:500; letter-spacing:0.5px;">by DailyDrop Grocery</span>
+      <p style="font-size:12px; margin-top:8px; line-height:1.5;">
+        Fresh & Quality Products at your doorstep.<br>
+        <i><b>Good Food, Better Life!</b></i>
+      </p>
+      <div style="margin-top:15px; font-size:13px; line-height:2.2;">
+        <div>🚚 Fast & Free Delivery</div>
+        <div>🥬 100% Fresh & Organic</div>
+        <div>🔒 Secure Payment</div>
+        <div>↩️ Easy Returns</div>
+      </div>
+    </div>
+
+    <!-- Column 2 -->
+    <div>
+     <h4 style="color:#ffeb3b; margin-top:0; font-size:16px;">Shop Links</h4>
+    <div class="footer-links" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px">
+       <a href="/?category=Fruits" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Fruits</a>
+       <a href="/?category=Vegetables" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Vegetables</a>
+       <a href="/?category=Bakery" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Bakery</a>
+      <a href="/?category=Grains%20%26%20Pulses" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Grains &amp; Pulses</a>
+       <a href="/?category=Spices" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Spices</a>
+      <a href="/?category=Cooking%20Oil" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Cooking Oil</a>
+      <a href="/?category=Personal%20Care" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Personal Care</a>
+      <a href="/?category=Household%20Items" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Household items</a>   
+       <a href="/?category=Stationery" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Stationery</a>
+      <a href="/?category=Dairy%20products" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Dairy products</a>
+       <a href="/?category=Combos" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Combos</a>
+       <a href="/cart/" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• Cart</a>
+       <a href="/my-orders/" style="color:white; text-decoration:none; font-size:13px; line-height:2.2;">• My Orders</a>
+      </div>
+    </div>
+
+    <!-- Column 3 -->
+    <div>
+      <h4 style="color:#ffeb3b; margin-top:0; font-size:16px;">Stay Updated</h4>
+      <p style="font-size:12px; margin-top:0;">Get updates on offers & new arrivals</p>
+    </div>
+
+  <div style="text-align:center; font-size:11px; margin-top:20px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.2); opacity:0.9;">
+    © 2024 Freshora – DailyDrop Grocery. All rights reserved. | Privacy Policy | Terms of Service
+  </div>
+</footer>
+
+<a href="https://wa.me/919664568200?text=Hello%20Grocery%20Store,%20mujhe%20order%20karna%20hai" 
+   class="wa-float" 
+   target="_blank">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+</a>
+<style>
+  #cart-popup {
+    position: fixed;
+    bottom: 20px;
+    left: 16px;
+    right: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+    background: #111111;
+    color: #ffffff;
+    border-left: 5px solid #0C831F;
+    border-radius: 12px;
+    padding: 14px 18px;
+    z-index: 9999999;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transform: translateY(120%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  }
+  #cart-popup.popup-show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #cart-popup.popup-error {
+    border-left-color: #ef4444;
+  }
+  .cart-popup-icon-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: rgba(12, 131, 31, 0.18);
+    color: #22c55e;
+  }
+  #cart-popup.popup-error .cart-popup-icon-wrap {
+    background: rgba(239, 68, 68, 0.18);
+    color: #ef4444;
+  }
+  .cart-popup-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .cart-popup-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+  .cart-popup-text {
+    font-size: 12px;
+    color: #a1a1aa;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+
+<div id="cart-popup">
+  <div id="cart-popup-icon" class="cart-popup-icon-wrap">
+    <i class="fa-solid fa-check"></i>
+  </div>
+  <div class="cart-popup-content">
+    <div id="cart-popup-title" class="cart-popup-title">Added to Cart</div>
+    <div id="cart-popup-text" class="cart-popup-text">Item successfully added!</div>
+  </div>
+</div>
+
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    return parts.length === 2 ? parts.pop().split(';').shift() : '';
+  }
+
+  document.querySelectorAll('form[method="post"], form[method="POST"]').forEach(function(form) {
+    form.addEventListener('submit', function() {
+      const token = getCookie('csrftoken');
+      const field = form.querySelector('input[name="csrfmiddlewaretoken"]');
+      if (token && field) field.value = token;
+    });
+  });
+
+  const profileWrap = document.getElementById('profileWrap');
+  if (profileWrap) {
+    profileWrap.addEventListener('click', function(event) {
+      if (!event.target.closest('button')) {
+        profileWrap.classList.toggle('is-open');
+      }
+    });
+    document.addEventListener('click', function(event) {
+      if (!profileWrap.contains(event.target)) {
+        profileWrap.classList.remove('is-open');
+      }
+    });
+  }
+
+  // --- Cart Popup & Auth Handling ---
+  let popupTimer = null;
+  function showPopup(msg, isError, title) {
+    const popup = document.getElementById('cart-popup');
+    const titleEl = document.getElementById('cart-popup-title');
+    const textEl = document.getElementById('cart-popup-text');
+    const iconEl = document.getElementById('cart-popup-icon');
+    if (!popup || !textEl) return;
+
+    textEl.innerText = msg;
+
+    if (isError) {
+      popup.classList.add('popup-error');
+      if (titleEl) titleEl.innerText = title || "Login Required";
+      if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+    } else {
+      popup.classList.remove('popup-error');
+      if (titleEl) titleEl.innerText = title || "Success";
+      if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+    }
+
+    popup.classList.add('popup-show');
+
+    if (popupTimer) clearTimeout(popupTimer);
+    popupTimer = setTimeout(function() {
+      popup.classList.remove('popup-show');
+    }, 3200);
+  }
+
+  function handleAddToCart(e, productName) {
+    const isAuth = "{{ user.is_authenticated }}" === "True";
+    if (!isAuth) {
+      if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      }
+      showPopup("Please login first to add to cart!", true, "Login Required");
+      setTimeout(function() {
+        window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname + window.location.search);
+      }, 1500);
+      return false;
+    }
+    return true;
+  }
+ document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('login_required') === '1') {
+      showPopup("Please login first to place order!", true, "Login Required");
+      const nextParam = params.get('next') || window.location.pathname;
+      setTimeout(function() {
+        window.location.href = '/login/?next=' + encodeURIComponent(nextParam);
+      }, 1500);
+    } else if (params.get('added') === '1') {
+       const prodName = params.get('name') || 'Item';
+       showPopup(prodName + " added to cart!", false, "Added to Cart");
+       if (window.history && window.history.replaceState) {
+         const cleanUrl = window.location.pathname;
+         window.history.replaceState({}, document.title, cleanUrl);
+      }
+   }
+  });
+
+  
+document.addEventListener('click', function(e){
+    const btn = e.target.closest('.wishlist-btn');
+    if(btn){
+        e.preventDefault();
+        const url = btn.href;
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'login_required') {
+                showPopup("Please login first to use Wishlist!", true, "Login Required");
+                setTimeout(function() {
+                    window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname + window.location.search);
+                }, 1200);
+            } else if(data.status === 'added') {
+                showPopup("Item added to your Wishlist! ❤️", false, "Wishlist");
+                const allMatchingBtns = document.querySelectorAll('.wishlist-btn[data-id="' + data.product_id + '"]');
+                allMatchingBtns.forEach(b => {
+                    b.innerHTML = '<i class="fa-solid fa-heart" style="color:#ef4444;"></i>';
+                });
+                const countBadge = document.getElementById('wishlist-count');
+                if (countBadge) {
+                    countBadge.innerText = data.count;
+                    countBadge.style.display = data.count > 0 ? 'flex' : 'none';
+                }
+            } else if(data.status === 'removed') {
+                showPopup("Item removed from your Wishlist", false, "Wishlist");
+                const allMatchingBtns = document.querySelectorAll('.wishlist-btn[data-id="' + data.product_id + '"]');
+                allMatchingBtns.forEach(b => {
+                    b.innerHTML = '<i class="fa-regular fa-heart" style="color:#94a3b8;"></i>';
+                });
+                const countBadge = document.getElementById('wishlist-count');
+                if (countBadge) {
+                    countBadge.innerText = data.count;
+                    countBadge.style.display = data.count > 0 ? 'flex' : 'none';
+                }
+                const card = btn.closest('.wishlist-card-item');
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.9)';
+                    card.style.transition = 'all 0.25s ease';
+                    setTimeout(function(){
+                        card.remove();
+                        const grid = document.querySelector('.wishlist-grid');
+                        if (grid && grid.querySelectorAll('.wishlist-card-item').length === 0) {
+                            window.location.reload();
+                        }
+                    }, 250);
+                }
+            }
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+});
+</script>
+</body>
+</html>

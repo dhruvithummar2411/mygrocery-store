@@ -1,0 +1,913 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .category-bar-sticky {
+    position: sticky;
+    top: 0;
+    background: #ffffff;
+    z-index: 20;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .category-scroll-wrapper {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 8px 4px 6px 4px;
+    align-items: flex-start;
+  }
+
+  .category-circle-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+    flex: 0 0 auto;
+    min-width: 70px;
+    text-align: center;
+    transition: transform 0.15s ease;
+  }
+  .category-circle-item:hover {
+    transform: translateY(-2px);
+  }
+
+  .category-circle-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #334155;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  .category-circle-item:hover .category-circle-icon {
+    border-color: #22c55e;
+    background: #f0fdf4;
+  }
+
+  
+  .category-circle-item.active .category-circle-icon {
+    border: 2.5px solid #16a34a !important;
+    background: #f0fdf4 !important;
+    color: #16a34a !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25) !important;
+    transform: scale(1.05);
+  }
+
+  .category-circle-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    margin-top: 5px;
+    line-height: 1.2;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .category-circle-item.active .category-circle-label {
+    color: #15803d;
+    font-weight: 800;
+  }
+
+  .banner-wrap {
+    max-width: 1200px;
+    margin: 10px auto 16px;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+  .banner {
+    height: 200px;
+    max-width: 1200px;
+    margin: 0 auto;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #0e6b3e 0%, #16a34a 100%);
+    color: #ffffff;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(14, 107, 62, 0.15);
+    box-sizing: border-box;
+  }
+  .banner-content {
+    flex: 1;
+    max-width: 65%;
+    z-index: 2;
+  }
+  .banner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    backdrop-filter: blur(4px);
+  }
+  .banner-title {
+    font-size: 22px;
+    font-weight: 850;
+    line-height: 1.2;
+    margin: 0 0 6px;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .banner-subtitle {
+    font-size: 13px;
+    opacity: 0.92;
+    margin: 0 0 12px;
+    font-weight: 500;
+  }
+  .banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    color: #0e6b3e;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .banner-btn:hover {
+    background: #f0fdf4;
+    transform: translateY(-1px);
+  }
+  .banner-img-box {
+    flex-shrink: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 1;
+  }
+  .banner-img-box img {
+    height: 160px;
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
+    border-radius: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .banner {
+      height: 160px;
+      padding: 14px 18px;
+    }
+    .banner-title {
+      font-size: 17px;
+    }
+    .banner-subtitle {
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+    .banner-btn {
+      padding: 5px 12px;
+      font-size: 11px;
+    }
+    .banner-img-box img {
+      height: 120px;
+    }
+  }
+
+  .subcat-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+  }
+  .subcat-pill:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+  .subcat-pill.active-pill {
+    background: #0a7e07 !important;
+    color: #ffffff !important;
+    border-color: #0a7e07 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(10, 126, 7, 0.25);
+  }
+
+  /* ── Subcategory Bar ── */
+  .subcategory-bar {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .subcategory-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .subcategory-btn {
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    color: #334155;
+  }
+  .subcategory-btn:hover {
+    border-color: #0a7e07;
+    color: #0a7e07;
+  }
+  .subcategory-btn.active {
+    background: #0a7e07;
+    color: white;
+    border-color: #0a7e07;
+  }
+
+  /* ── Filter Utility ── */
+  .hidden {
+    display: none !important;
+  }
+
+  /* ── Product Grid ── */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    width: 100%;
+  }
+
+  /* ── Product Card ── */
+  .product-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mini-product-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    min-height: 290px;
+    height: auto !important;
+    max-height: none !important;
+  }
+  .mini-product-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: #cbd5e1;
+  }
+
+  @media (max-width: 520px) {
+    .products-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+
+  /* Flash Sale mini card style */
+  .mini-product-card.flash-card {
+    border: 1.5px solid #ef4444 !important;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+  }
+
+  .mini-flash-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    z-index: 2;
+  }
+
+  .mini-card-timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #111111;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    width: fit-content;
+  }
+  .mini-card-timer i {
+    color: #ef4444;
+    font-size: 9px;
+  }
+
+  .flash-card-timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #111111;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    width: fit-content;
+    letter-spacing: 0.3px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    transition: background 0.2s ease;
+  }
+
+  .mini-card-img-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    width: 100%;
+    text-decoration: none;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .mini-card-img-wrap img {
+    height: 150px;
+    max-height: 150px;
+    width: 100%;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .mini-card-placeholder {
+    width: 100%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    color: #94a3b8;
+    font-size: 32px;
+    border-radius: 8px;
+  }
+
+  .mini-card-delivery {
+    color: #16a34a;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 4px 0 2px 0;
+    white-space: nowrap;
+  }
+
+  .mini-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+  }
+  .mini-card-name:hover {
+    color: #0c831f;
+  }
+
+  .mini-card-price {
+    color: #16a34a;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .btn-view-details {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    text-align: center;
+    text-decoration: none;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    margin-top: auto;
+  }
+  .btn-view-details:hover {
+    background: #16a34a;
+    color: #ffffff;
+    border-color: #16a34a;
+  }
+</style>
+
+<div class="category-bar-sticky py-2 px-4">
+  <div class="w-full max-w-[1400px] mx-auto">
+    <div class="category-scroll-wrapper scrollbar-hide">
+      
+    
+      <a href="{% url 'home' %}" class="category-circle-item {% if not selected_category %}active{% endif %}" data-category="all" data-category-name="All">
+        <div class="category-circle-icon">
+          <i class="fa-solid fa-border-all" style="font-size: 20px;"></i>
+        </div>
+        <span class="category-circle-label">All</span>
+      </a>
+
+      {% for cat in categories %}
+      <a href="?category={{ cat.id }}" class="category-circle-item {% if selected_category == cat.id %}active{% endif %}" data-category="{{ cat.id }}" data-category-name="{{ cat.name }}">
+        <div class="category-circle-icon">
+          {% if cat.name == "Fruits" %}🍎
+          {% elif cat.name == "Vegetables" %}🥦
+          {% elif cat.name == "Dairy products" %}🥛
+          {% elif cat.name == "Bakery" %}🥖
+          {% elif cat.name == "Grains & Pulses" %}🌾
+          {% elif cat.name == "Spices" %}🌶️
+          {% elif cat.name == "Cooking Oil" %}🛢️
+          {% elif cat.name == "Personal Care" %}🧴
+          {% elif cat.name == "Household Items" %}🧹
+          {% elif cat.name == "Stationery" %}✏️
+          {% elif cat.name == "Combos" %}🎁
+          {% else %}🛍️
+          {% endif %}
+        </div>
+        <span class="category-circle-label" title="{{ cat.name }}">{{ cat.name }}</span>
+      </a>
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+
+{% if not query %}
+<div class="banner-wrap">
+  <div class="banner">
+    <div class="banner-content">
+      <div class="banner-badge">
+        ⚡ Fast 10-Minute Delivery
+      </div>
+      <h1 class="banner-title text-xl md:text-2xl">
+        Fresh Groceries Delivered at Your Doorstep
+      </h1>
+      <p class="banner-subtitle">
+        100% Quality Produce & Daily Essentials · Cash on Delivery
+      </p>
+      <a href="#explore-products" class="banner-btn">
+        Shop Now <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+    <div class="banner-img-box">
+      <img src="{% static 'images/banner.jpeg' %}" 
+           alt="Freshora – DailyDrop Grocery">
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if query %}
+<div style="padding:20px; background:#e8f5e9; margin:15px; border-radius:10px; text-align:center;">
+  <h3 style="margin:0;"> Found {{ products|length }} products{{products|length|pluralize}} for "{{query}}" </h3>
+  <a href="{% url 'home' %}" style="color:green;">Clear Search</a>
+</div>
+{% endif %}
+
+<!-- 4. 🏷️ SUBCATEGORY PILLS (if category selected) -->
+{% if selected_category and subcategories %}
+<div id="subcategory-section" class="w-full max-w-[1400px] mx-auto px-4 py-2 mb-3">
+  <div class="flex gap-2 overflow-x-auto scrollbar-hide items-center">
+    <!-- "All" Subcategory Pill (Green when active) -->
+    <a href="?category={{ selected_category }}" class="subcat-pill {% if not selected_subcategory %}active-pill bg-[#0a7e07] text-white{% else %}bg-gray-100{% endif %}" onclick="sessionStorage.setItem('scrollPos', window.scrollY)">
+      All
+    </a>
+
+    <!-- Subcategory Pills -->
+    {% for sub in subcategories %}
+    <a href="?category={{ selected_category }}&subcategory={{ sub.id }}" class="subcat-pill {% if selected_subcategory == sub.id or selected_subcategory.id == sub.id %}active-pill bg-[#0a7e07] text-white{% else %}bg-gray-100{% endif %}" onclick="sessionStorage.setItem('scrollPos', window.scrollY)">
+      {{ sub.name }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- 5. 🔁 BUY AGAIN SECTION (ONLY show if no category selected) -->
+{% if not selected_category and not query and buy_again_products %}
+<div id="buy-again-section" class="w-full max-w-[1400px] mx-auto px-4 mb-6">
+  <!-- Header: flex justify-between with See all -->
+  <div class="flex justify-between items-center mb-3">
+    <div class="flex items-center gap-2">
+      <div style="width:28px; height:28px; background:#e8f5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px;">🔁</div>
+      <h2 style="font-size:18px; font-weight:800; margin:0; color:#1e293b;">Buy Again</h2>
+    </div>
+    <a href="{% url 'my_orders' %}" style="color:#16a34a; font-weight:700; font-size:13px; text-decoration:none; display:flex; align-items:center; gap:3px;">
+      See all &rarr;
+    </a>
+  </div>
+
+  <!-- Products: ONE LINE ONLY, horizontal scroll flex gap-4 scrollbar-hide, 180px cards -->
+  <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+    {% for p in buy_again_products %}
+    <div class="mini-product-card min-w-[180px] max-w-[180px] flex-shrink-0 snap-start">
+      <a href="{% url 'add_to_wishlist' p.id %}" class="wishlist-btn" data-id="{{ p.id }}" title="Wishlist">
+        {% if p.id in wishlist_product_ids %}
+          <i class="fa-solid fa-heart" style="color:#ef4444;"></i>
+        {% else %}
+          <i class="fa-regular fa-heart"></i>
+        {% endif %}
+      </a>
+      <a href="{% url 'product_detail' p.id %}" class="mini-card-img-wrap">
+        {% if p.image %}
+          <img src="{{ p.image.url }}" alt="{{ p.name }}">
+        {% else %}
+          <div class="mini-card-placeholder"><i class="fa-solid fa-basket-shopping"></i></div>
+        {% endif %}
+      </a>
+      <div class="mini-card-delivery">⚡ {{ p.delivery_time|default:"10 MINS" }}</div>
+      <a href="{% url 'product_detail' p.id %}" class="mini-card-name" title="{{ p.name }}">
+        {{ p.name }}
+      </a>
+      <div class="mini-card-price">
+        ₹{{ p.discounted_price|default:p.price }}
+      </div>
+      <a href="{% url 'product_detail' p.id %}" class="btn-view-details">View Details</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- 6. 🔥 MOST BOUGHT TODAY SECTION (ONLY show if no category selected) -->
+{% if not selected_category and not query and best_sellers %}
+<div id="most-bought-section" class="w-full max-w-[1400px] mx-auto px-4 mb-6">
+  <!-- Header: flex justify-between with See all -->
+  <div class="flex justify-between items-center mb-3">
+    <div class="flex items-center gap-2">
+      <div style="width:28px; height:28px; background:#fff3e0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px;">🔥</div>
+      <h2 style="font-size:18px; font-weight:800; margin:0; color:#1e293b;">Most Bought Today</h2>
+      <span style="background:#ffeaea; color:#d32f2f; font-size:9px; padding:2px 6px; border-radius:10px; margin-left:6px; font-weight:700;">LIVE TRENDING</span>
+    </div>
+    <a href="#explore-products" style="color:#16a34a; font-weight:700; font-size:13px; text-decoration:none; display:flex; align-items:center; gap:3px;">
+      See all &rarr;
+    </a>
+  </div>
+
+  <!-- Products: ONE LINE ONLY, horizontal scroll flex gap-4 scrollbar-hide, 180px cards -->
+  <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+    {% for p in best_sellers %}
+    <div class="mini-product-card min-w-[180px] max-w-[180px] flex-shrink-0 snap-start">
+      <a href="{% url 'add_to_wishlist' p.id %}" class="wishlist-btn" data-id="{{ p.id }}" title="Wishlist">
+        {% if p.id in wishlist_product_ids %}
+          <i class="fa-solid fa-heart" style="color:#ef4444;"></i>
+        {% else %}
+          <i class="fa-regular fa-heart"></i>
+        {% endif %}
+      </a>
+      <a href="{% url 'product_detail' p.id %}" class="mini-card-img-wrap">
+        {% if p.image %}
+          <img src="{{ p.image.url }}" alt="{{ p.name }}">
+        {% else %}
+          <div class="mini-card-placeholder"><i class="fa-solid fa-basket-shopping"></i></div>
+        {% endif %}
+      </a>
+      <div class="mini-card-delivery">⚡ {{ p.delivery_time|default:"10 MINS" }}</div>
+      <a href="{% url 'product_detail' p.id %}" class="mini-card-name" title="{{ p.name }}">
+        {{ p.name }}
+      </a>
+      <div class="mini-card-price">
+        ₹{{ p.discounted_price|default:p.price }}
+      </div>
+      <a href="{% url 'product_detail' p.id %}" class="btn-view-details">View Details</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- 7. 🛒 EXPLORE PRODUCTS / FILTERED PRODUCTS (Centered Grid) -->
+<div id="explore-products" class="w-full max-w-[1400px] mx-auto px-4 mb-10">
+  <div class="flex items-center gap-2 mb-4">
+    <div style="width:28px; height:28px; background:#e0f2fe; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px;">🛒</div>
+    <h2 id="explore-title" style="font-size:18px; font-weight:800; margin:0; color:#1e293b;">
+      {% if selected_category %}
+        {% for c in categories %}{% if c.id == selected_category %}{{ c.name }}{% endif %}{% endfor %}
+        {% if selected_subcategory %}
+          - {% for s in subcategories %}{% if s.id == selected_subcategory %}{{ s.name }}{% endif %}{% endfor %}
+        {% endif %}
+      {% else %}
+        Explore Products
+      {% endif %}
+    </h2>
+  </div>
+
+  <div class="products-grid">
+    {% for p in products %}
+    <div class="product-card mini-product-card {% if p.is_flash_deal %}flash-card{% endif %}"
+         data-category-id="{{ p.category.id|default:'' }}"
+         data-category-name="{{ p.category.name|default:'' }}">
+         <a href="{% url 'add_to_wishlist' p.id %}" class="wishlist-btn" data-id="{{ p.id}}title="">
+             {% if p.id in wishlist_product_ids %}
+               <i class="fa-solid fa-heart" style="color:#ef4444;"></i>
+             {% else %}
+                 <i class="fa-regular fa-heart"></i>
+             {% endif %}
+          </a>
+      {% if p.is_flash_deal %}
+        <div class="mini-flash-badge">🔥 HOT DEAL</div>
+      {% endif %}
+      <a href="{% url 'product_detail' p.id %}" class="mini-card-img-wrap">
+        {% if p.image %}
+          <img src="{{ p.image.url }}" alt="{{ p.name }}">
+        {% else %}
+          <div class="mini-card-placeholder"><i class="fa-solid fa-basket-shopping"></i></div>
+        {% endif %}
+      </a>
+      {% if p.is_flash_deal and p.flash_end_time %}
+        <span class="flash-card-timer" data-end="{{ p.flash_end_time|date:'c' }}"></span>
+      {% else %}
+        <div class="mini-card-delivery">⚡ {{ p.delivery_time|default:"10 MINS" }}</div>
+      {% endif %}
+      <a href="{% url 'product_detail' p.id %}" class="mini-card-name" title="{{ p.name }}">
+        {{ p.name }}
+      </a>
+      <div class="mini-card-price">
+        ₹{{ p.discounted_price|default:p.price }}
+      </div>
+      <a href="{% url 'product_detail' p.id %}" class="btn-view-details">View Details</a>
+    </div>
+    {% empty %}
+    <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px 0; width: 100%;">No products found.</p>
+    {% endfor %}
+    <p id="no-products-msg" class="hidden" style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px 0; width: 100%;">No products found in this category.</p>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  // 1. Flash Deal Countdown Timers
+  document.querySelectorAll('.flash-card-timer').forEach(function(el){
+    var end = new Date(el.dataset.end).getTime();
+    var iv = setInterval(function(){
+      var diff = end - Date.now();
+      if(diff <= 0){ clearInterval(iv); el.innerText = "Deal Ended"; el.style.background="gray"; return; }
+      var m = Math.floor(diff/60000);
+      var s = Math.floor((diff%60000)/1000);
+      el.innerText = "⏰ " + m + ":" + (s<10?"0"+s:s) + " Flash";
+    },1000);
+  });
+
+  // 2. Category Filter & Subcategory Bar Handling
+  var categoryItems = document.querySelectorAll('.category-circle-item');
+  var productCards = document.querySelectorAll('.products-grid .product-card');
+  var exploreTitle = document.getElementById('explore-title');
+  var buyAgainSec = document.getElementById('buy-again-section');
+  var mostBoughtSec = document.getElementById('most-bought-section');
+  var noProductsMsg = document.getElementById('no-products-msg');
+  var subcategoryBar = document.getElementById('subcategory-bar');
+  var isServerFiltered = {% if selected_category %}true{% else %}false{% endif %};
+
+  var dairyButtons = ["All Milk", "Full Cream", "Toned Milk", "Amul Gold", "Amul Taaza"];
+
+  function hideSubcategoryBar() {
+    if (!subcategoryBar) return;
+    subcategoryBar.innerHTML = '';
+    subcategoryBar.style.display = 'none';
+  }
+
+  function renderDairySubcategories() {
+    if (!subcategoryBar) return;
+    subcategoryBar.innerHTML = '';
+    subcategoryBar.style.display = 'flex';
+
+    dairyButtons.forEach(function(btnText, idx) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'subcategory-btn' + (idx === 0 ? ' active' : '');
+      btn.innerText = btnText;
+
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        subcategoryBar.querySelectorAll('.subcategory-btn').forEach(function(b) {
+          b.classList.remove('active');
+        });
+        btn.classList.add('active');
+
+        filterByDairySubcategory(btnText);
+      });
+
+      subcategoryBar.appendChild(btn);
+    });
+  }
+
+  function filterByDairySubcategory(subName) {
+    var matchedCount = 0;
+    var target = subName.toLowerCase().trim();
+
+    productCards.forEach(function(card) {
+      var cardCatName = (card.getAttribute('data-category-name') || '').toLowerCase();
+      var cardCatId = card.getAttribute('data-category-id');
+      var isDairy = cardCatName.includes('dairy') || cardCatId === '15';
+
+      if (!isDairy) {
+        card.classList.add('hidden');
+        return;
+      }
+
+      var pNameEl = card.querySelector('.mini-card-name');
+      var pName = (pNameEl ? pNameEl.innerText : '').toLowerCase();
+
+      var isMatch = false;
+      if (target === 'all milk' || target === 'all') {
+        isMatch = true;
+      } else if (target === 'full cream') {
+        isMatch = pName.includes('full cream');
+      } else if (target === 'toned milk') {
+        isMatch = pName.includes('toned');
+      } else if (target === 'amul gold') {
+        isMatch = pName.includes('gold');
+      } else if (target === 'amul taaza') {
+        isMatch = pName.includes('taaza');
+      } else {
+        isMatch = pName.includes(target);
+      }
+
+      if (isMatch) {
+        card.classList.remove('hidden');
+        card.style.display = '';
+        matchedCount++;
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+
+    if (noProductsMsg) {
+      if (matchedCount === 0) {
+        noProductsMsg.classList.remove('hidden');
+      } else {
+        noProductsMsg.classList.add('hidden');
+      }
+    }
+
+    if (exploreTitle) {
+      exploreTitle.innerText = (target === 'all milk' || target === 'all') ? 'Dairy products' : ('Dairy products - '   + subName);
+    }
+  
+  if (isServerFiltered) {
+    var activeCircle = document.querySelector('.category-circle-item.active');
+    var activeCatName = activeCircle ? (activeCircle.getAttribute('data-category-name') || activeCircle.innerText.trim()) : '';
+    if (activeCatName.toLowerCase().includes('dairy')) {
+      renderDairySubcategories();
+    }
+  }
+
+  if (categoryItems.length > 0 && productCards.length > 0) {
+    categoryItems.forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        var catId = this.getAttribute('data-category');
+        var catLabel = this.querySelector('.category-circle-label');
+        var catName = this.getAttribute('data-category-name') || (catLabel ? catLabel.innerText.trim() : '');
+
+        
+        if (isServerFiltered) {
+          return; 
+        }
+
+      
+        e.preventDefault();
+
+        // Update active class on category circles
+        categoryItems.forEach(function(ci) {
+          ci.classList.remove('active');
+        });
+        this.classList.add('active');
+
+        var isDairy = catName.toLowerCase().includes('dairy') || catId === '15';
+
+        if (!catId || catId.toLowerCase() === 'all') {
+          hideSubcategoryBar();
+          
+          productCards.forEach(function(card) {
+            card.classList.remove('hidden');
+            card.style.display = '';
+          });
+          if (buyAgainSec) buyAgainSec.classList.remove('hidden');
+          if (mostBoughtSec) mostBoughtSec.classList.remove('hidden');
+          if (noProductsMsg) noProductsMsg.classList.add('hidden');
+          if (exploreTitle) exploreTitle.innerText = 'Explore Products';
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        } else if (isDairy) {
+          renderDairySubcategories();
+          filterByDairySubcategory('All Milk');
+
+          if (buyAgainSec) buyAgainSec.classList.add('hidden');
+          if (mostBoughtSec) mostBoughtSec.classList.add('hidden');
+
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, '?category=' + encodeURIComponent(catId));
+          }
+        } else {
+          hideSubcategoryBar();
+          var matchedCount = 0;
+          productCards.forEach(function(card) {
+            var cardCatId = card.getAttribute('data-category-id');
+            var cardCatName = card.getAttribute('data-category-name');
+            var isMatch = (cardCatId && cardCatId === catId) ||
+                          (cardCatName && catName && cardCatName.toLowerCase() === catName.toLowerCase());
+
+            if (isMatch) {
+              card.classList.remove('hidden');
+              card.style.display = '';
+              matchedCount++;
+            } else {
+              card.classList.add('hidden');
+            }
+          });
+
+          if (buyAgainSec) buyAgainSec.classList.add('hidden');
+          if (mostBoughtSec) mostBoughtSec.classList.add('hidden');
+
+          if (noProductsMsg) {
+            if (matchedCount === 0) {
+              noProductsMsg.classList.remove('hidden');
+            } else {
+              noProductsMsg.classList.add('hidden');
+            }
+          }
+
+          if (exploreTitle && catName) {
+            exploreTitle.innerText = catName;
+          }
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, '?category=' + encodeURIComponent(catId));
+          }
+        }
+      });
+    });
+  }
+});
+</script>
+
+<script>
+  window.addEventListener('load', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has('subcategory') || urlParams.has('category')) {
+      const section = document.getElementById('subcategory-section');
+      if(section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
+</script>
+
+{% endblock %}

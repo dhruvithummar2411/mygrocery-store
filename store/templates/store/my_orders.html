@@ -1,0 +1,324 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.orders-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 16px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.orders-title {
+  margin: 0;
+  font-size: 24px;
+  color: #143e22;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.delivered-notice {
+  background: #f0f7f2;
+  border: 1px solid #c2e2c9;
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-bottom: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  color: #2b5636;
+}
+.delivered-notice a {
+  background: #0C831F;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.delivered-notice a:hover {
+  background: #096818;
+}
+.track-wrap {
+  background: #fff;
+  border: 1px solid #dce8df;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.04);
+}
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.order-card-header h4 {
+  margin: 0;
+  font-size: 17px;
+  color: #1a3e26;
+}
+.status-badge {
+  background: #e8f5e9;
+  color: #0C831F;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.track {
+  display: flex;
+  justify-content: space-between;
+  margin: 24px 0 16px;
+  position: relative;
+}
+.track::before {
+  content: '';
+  position: absolute;
+  top: 17px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #e5ede7;
+}
+.line {
+  position: absolute;
+  top: 17px;
+  left: 0;
+  height: 4px;
+  background: #0C831F;
+  transition: width 0.5s ease;
+  width: 10%;
+}
+.line-ordered { width: 10%; }
+.line-packed { width: 50%; }
+.line-shipped { width: 100%; }
+.step {
+  text-align: center;
+  width: 33.33%;
+  position: relative;
+  z-index: 1;
+}
+.circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e5ede7;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #6e8274;
+}
+.step.active .circle {
+  background: #0C831F;
+  color: #fff;
+}
+.step p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #63776a;
+}
+.step.active p {
+  color: #143e22;
+  font-weight: 700;
+}
+.order-items-preview {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #f9fbf9;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #3b5042;
+}
+.order-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #edf3ee;
+}
+.btn-order-view {
+  background: #0C831F;
+  color: #fff;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-order-view:hover {
+  background: #096818;
+}
+/* DELETE BUTTON CSS - DISABLED (customer accidentally delete na kare)
+/* DELETE BUTTON CSS - DISABLED (prevent accidental deletion by customer)
+.btn-order-delete {
+  background: #fff3f3;
+  color: #d32f2f;
+  border: 1px solid #f9cece;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-order-delete:hover {
+  background: #d32f2f;
+  color: #fff;
+}
+*/
+.btn-order-cancel {
+  background: #fff8e1;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-order-cancel:hover {
+  background: #e65100;
+  color: #fff;
+}
+.empty-active-orders {
+  text-align: center;
+  background: #fff;
+  padding: 50px 20px;
+  border-radius: 14px;
+  border: 1px solid #dce8df;
+  margin-top: 15px;
+}
+.empty-active-icon {
+  font-size: 48px;
+  color: #9cb1a3;
+  margin-bottom: 12px;
+}
+</style>
+
+<div class="orders-container">
+  <div class="orders-header">
+    <h2 class="orders-title"><i class="fa-solid fa-box" style="color:#0C831F;"></i> Active Orders</h2>
+    <a href="{% url 'my_bills' %}" style="color:#0C831F; font-size:13px; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:5px;">
+      <i class="fa-solid fa-receipt"></i> View All Bills &amp; Invoices &rarr;
+    </a>
+  </div>
+
+  <div class="delivered-notice">
+    <div>
+      <i class="fa-solid fa-circle-info" style="color:#0C831F;"></i>
+      <strong>Active orders only:</strong> Once an order is delivered, it is automatically moved to <strong>My Bills</strong>.
+    </div>
+    <a href="{% url 'my_bills' %}"><i class="fa-solid fa-file-invoice"></i> My Bills</a>
+  </div>
+
+  {% for order in orders %}
+  <div class="track-wrap">
+    <div class="order-card-header">
+      <div>
+        <h4>Order #{{ order.id }} &bull; ₹{{ order.total_amount }}</h4>
+        <span style="font-size:12px; color:#728478;">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</span>
+      </div>
+      <div>
+        <span class="status-badge">{{ order.status }}</span>
+      </div>
+    </div>
+
+    <!-- Tracking Steps: Ordered -> Packed -> Shipped -->
+    <div class="track">
+      <div class="line line-{{ order.status|lower }}"></div>
+      <div class="step active">
+        <div class="circle"><i class="fa-solid fa-check"></i></div>
+        <p>Ordered</p>
+      </div>
+      <div class="step {% if order.status in 'Packed Shipped Delivered' %}active{% endif %}">
+        <div class="circle">{% if order.status in 'Packed Shipped Delivered' %}<i class="fa-solid fa-check"></i>{% else %}2{% endif %}</div>
+        <p>Packed</p>
+      </div>
+      <div class="step {% if order.status in 'Shipped Delivered' %}active{% endif %}">
+        <div class="circle">{% if order.status in 'Shipped Delivered' %}<i class="fa-solid fa-check"></i>{% else %}3{% endif %}</div>
+        <p>Shipped</p>
+      </div>
+    </div>
+
+    {% if order.items.all %}
+    <div class="order-items-preview">
+      <strong>Items:</strong>
+      {% for item in order.items.all %}
+        {{ item.product_name }} (×{{ item.qty }}){% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="order-actions">
+      <a href="{% url 'bill_detail' order.id %}" class="btn-order-view">
+        <i class="fa-solid fa-eye"></i> View Bill
+      </a>
+      {% if order.status == 'Ordered' or order.status == 'Packed' %}
+      <form action="{% url 'cancel_order' order.id %}" method="post" onsubmit="return confirm('Order #{{ order.id }} cancel karna chahte hain? Yeh action undo nahi ho sakta.');" style="margin:0; display:inline;">
+      <form action="{% url 'cancel_order' order.id %}" method="post" onsubmit="return confirm('Are you sure you want to cancel Order #{{ order.id }}? This action cannot be undone.');" style="margin:0; display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-order-cancel">
+          <i class="fa-solid fa-xmark"></i> Cancel Order
+        </button>
+      </form>
+      {% endif %}
+      {% comment %} DELETE BUTTON DISABLED — Customer se permanently delete nahi hona chahiye
+      <form action="{% url 'delete_bill' order.id %}" method="post" onsubmit="return confirm('Are you sure you want to delete Order #{{ order.id }}? It will be deleted from both My Orders and My Bills.');" style="margin:0; display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-order-delete">
+          <i class="fa-solid fa-trash-can"></i> Delete
+        </button>
+      </form>
+      {% endcomment %}
+    </div>
+  </div>
+
+  {% empty %}
+  <div class="empty-active-orders">
+    <div class="empty-active-icon"><i class="fa-solid fa-box-open"></i></div>
+    <h3 style="color:#193d25; margin:0 0 8px;">No Active Orders</h3>
+    <p style="color:#667b6d; font-size:14px; margin:0 0 18px;">
+      You don't have any ongoing orders at the moment.<br>
+      All completed or delivered orders are safely archived in <strong>My Bills</strong>.
+    </p>
+    <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+      <a href="{% url 'my_bills' %}" style="background:#0C831F; color:#fff; padding:9px 20px; border-radius:8px; text-decoration:none; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:6px;">
+        <i class="fa-solid fa-receipt"></i> View My Bills
+      </a>
+      <a href="{% url 'home' %}" style="background:#f0f5f1; color:#184a29; border:1px solid #bcdbc3; padding:9px 20px; border-radius:8px; text-decoration:none; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:6px;">
+        <i class="fa-solid fa-cart-shopping"></i> Start Shopping
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

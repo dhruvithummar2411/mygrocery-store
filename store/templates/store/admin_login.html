@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Freshora</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .login-box {
+            background: #ffffff;
+            padding: 35px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 360px;
+        }
+        .login-box h2 {
+            margin-bottom: 22px;
+            color: #28a745;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+        }
+        .input-wrap input {
+            padding-right: 42px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+            font-size: 15px;
+            user-select: none;
+            padding: 4px;
+        }
+        .toggle-password:hover {
+            color: #28a745;
+        }
+        .forgot-link-wrap {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 4px;
+            margin-bottom: 18px;
+        }
+        .forgot-link {
+            color: #28a745;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button[type="submit"]:hover {
+            background: #218838;
+        }
+        .back-home {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+        .back-home a {
+            color: #666;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-home a:hover {
+            color: #28a745;
+        }
+        .alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+        .alert-error {
+            background: #fde8e8;
+            color: #c81e1e;
+            border: 1px solid #f8b4b4;
+        }
+        .alert-success {
+            background: #def7ec;
+            color: #03543f;
+            border: 1px solid #bcf0da;
+        }
+        .alert-warning {
+            background: #fef08a;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2><i class="fa-solid fa-shield-halved"></i> Admin Login</h2>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-warning{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="adminUsername">Username</label>
+                <input type="text" id="adminUsername" name="username" placeholder="Enter admin username" required>
+            </div>
+            
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label for="adminPassword" style="margin-bottom: 0;">Password</label>
+                    <a href="{% url 'admin_forgot_password' %}" class="forgot-link">Forgot Password?</a>
+                </div>
+                <div class="input-wrap">
+                    <input type="password" id="adminPassword" name="password" placeholder="Enter admin password" required>
+                    <span class="toggle-password" id="toggleAdminPassword" title="Show/Hide Password">
+                        <i class="fa-solid fa-eye"></i>
+                    </span>
+                </div>
+            </div>
+
+            <button type="submit">Login to Dashboard</button>
+        </form>
+
+        <div class="back-home">
+            <a href="{% url 'home' %}"><i class="fa-solid fa-arrow-left"></i> Back to Freshora</a>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('toggleAdminPassword');
+        const pwdInput = document.getElementById('adminPassword');
+        if (toggleBtn && pwdInput) {
+            toggleBtn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (pwdInput.type === 'password') {
+                    pwdInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    pwdInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

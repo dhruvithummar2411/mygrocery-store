@@ -1,0 +1,91 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<h2> + Add New Product</h2>
+<form method="POST" enctype="multipart/form-data" style="background:white; padding:20px; border-radius:10px; max-width:500px;">
+    {%csrf_token %}
+    <label>Product Name:</label><br>
+    <input type="text" name="name" required style="width:100%; box-sizing:border-box; padding:8px; margin-bottom:10px;"><br>
+
+    <label>Category:</label><br>
+     <select name="category" required style="width:100%; padding:8px; margin-bottom:10px;">
+      <option value="" disabled selected>Select Category</option>
+        {% for c in categories %}
+        <option value="{{c.id}}">{{c.name}}</option>
+        {% endfor %}
+     </select><br>
+
+    <label>Discount (%):</label><br>
+    <input type="number" name="discount_percent" min="0" max="100" value="0" placeholder="Example: 10" style="width:100%; box-sizing:border-box; padding:8px; margin-bottom:10px;"><br>
+    <small style="display:block; color:#666; margin-top:-5px; margin-bottom:10px;">Enter 0 for no discount.</small>
+
+     <label>Subcategory(optional)</label>
+    <select name="subcategory"  style="width:100%; padding: 8px; margin-bottom: 10px;">
+       <option value="">Select Category</option>
+       {% for sub in subcategories %}
+          <option value="{{ sub.id }}">{{ sub.name }}</option>
+        {% endfor %}
+    </select><br>
+
+    <label>Description:</label><br>
+    <textarea name="description" rows="3" placeholder="Write about the product..." style="width:100%; padding:8px; margin-bottom:10px;"></textarea><br>
+
+    <label>Price ₹:</label><br>
+    <input type="number" step="0.01" name="price" required style="width:100%; padding:8px; margin-bottom:10px;"><br>
+
+    <!-- Flash Deal Section -->
+    <div style="margin-bottom:12px; padding:10px; background:#fff5f5; border:1px solid #fecaca; border-radius:8px;">
+      <label style="cursor:pointer; font-weight:700; color:#b91c1c; display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" name="is_flash_deal" id="is_flash_deal" style="width:18px; height:18px; accent-color:#dc2626;">
+        🔥 Enable Flash Deal
+      </label>
+      <div id="flash-deal-time-wrap" style="display:none; margin-top:10px;">
+        <label style="font-size:13px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Deal End Time (optional, default: 10 mins):</label>
+        <input type="datetime-local" name="flash_end_time" id="flash_end_time" style="width:100%; box-sizing:border-box; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
+      </div>
+    </div>
+    <script>
+      (function(){
+        const chk = document.getElementById('is_flash_deal');
+        const wrap = document.getElementById('flash-deal-time-wrap');
+        if(chk && wrap){
+          chk.addEventListener('change', function(){
+            wrap.style.display = this.checked ? 'block' : 'none';
+          });
+        }
+      })();
+    </script>
+
+    <label>Stock:</label><br>
+    <input type="number" name="stock" required style="width:100%; padding:8px; margin-bottom:10px;"><br>
+
+    <hr>
+<hr>
+<h5>Product Variants (500g, 1kg etc)</h5>
+<div id="variant-container">
+  <div class="row mb-2">
+    <div class="col"><input type="text" name="weight[]" placeholder="500g" class="form-control"></div>
+    <div class="col"><input type="number" name="variant_price[]" placeholder="Price" class="form-control"></div>
+    <div class="col"><input type="number" name="variant_stock[]" placeholder="Stock" class="form-control"></div>
+  </div>
+</div>
+
+ <button type="button" class="btn btn-sm btn-secondary" onclick="addVariant()">+ Add More Variant</button>
+
+<script>
+function addVariant(){
+  let html = `<div class="row mb-2">
+    <div class="col"><input type="text" name="weight[]" placeholder="Weight" class="form-control"></div>
+    <div class="col"><input type="number" name="variant_price[]" placeholder="Price" class="form-control"></div>
+    <div class="col"><input type="number" name="variant_stock[]" placeholder="Stock" class="form-control"></div>
+  </div>`;
+  document.getElementById('variant-container').insertAdjacentHTML('beforeend', html);
+}
+</script><br>
+ 
+    <label>Image:</label><br>
+    <input type="file" name="image" style="margin-bottom:10px;"><br>
+
+    <button type="submit" style="background:green; color:white; padding:10px 20px; border:none; border-radius:5px;">Save Product</button>
+
+{% endblock %}
+</form>
