@@ -19,10 +19,6 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django import forms
 from .models import Order, OrderItem, OfferTip, ProductRating
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import Wishlist
 from django.http import JsonResponse
@@ -164,7 +160,7 @@ def admin_required(view_func):
 def admin_dashboard(request):
     total_products = Product.objects.count()
     total_stock = Product.objects.aggregate(Sum('stock'))['stock__sum'] or 0
-    total_logins = LoginLog.objects.count()
+    total_logins = User.objects.count()
     today_logins = LoginLog.objects.filter(login_time__date=timezone.now().date()).count()
     low_stock_products = Product.objects.filter(stock__lt=10).order_by('stock')
 
@@ -199,7 +195,6 @@ def admin_dashboard(request):
         'total_orders':total_orders,
         'today_orders':today_orders,
         'total_revenue':total_revenue,
-        'today_revenue':today_revenue,
         'subcategories': subcategories,
     }
     return render(request, 'store/admin_dashboard.html', context)
