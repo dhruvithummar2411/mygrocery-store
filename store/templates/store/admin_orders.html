@@ -136,11 +136,26 @@
                   <span class="status-badge status-{{ order.status|lower }}">{{ order.status }}</span>
                 </td>
                 <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
-                <td>
+                <!--<td>
                   <a href="{% url 'bill_detail' order.id %}" class="btn-view">
                     <i class="fa-solid fa-eye"></i> View Details
                   </a>
-                </td>
+                </td>-->
+                <td style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                  <a href="{% url 'bill_detail' order.id %}" class="btn-view" style="padding:6px 10px; font-size:12px; white-space:nowrap;">
+                   <i class="fa-solid fa-eye"></i> View
+                   </a>
+                  <form method="POST" action="{% url 'update_order_status' order.id %}" style="display:flex; gap:4px;">
+                    {% csrf_token %}
+                    <select name="status" style="padding:5px; border-radius:6px; border:1px solid #ccc; font-size:12px;">
+                       <option value="Ordered" {% if order.status == 'Ordered' %}selected{% endif %}>Ordered</option>
+                       <option value="Packed" {% if order.status == 'Packed' %}selected{% endif %}>Packed</option>
+                       <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                      <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                     </select>
+                     <button type="submit" style="background:#0C831F; color:white; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:12px;">OK</button>
+                   </form>
+                 </td>
               </tr>
               {% empty %}
               <tr>

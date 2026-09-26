@@ -1419,3 +1419,11 @@ def wishlist_view(request):
     
     items = Wishlist.objects.filter(user=user).select_related('product').order_by('-created_at')
     return render(request, 'store/wishlist.html', {'items': items})
+
+def update_order_status(request, order_id):
+    order = Order.objects.get(id=order_id)
+    if request.method == "POST":
+        new_status = request.POST.get('status') # Packed / Shipped / Delivered
+        order.status = new_status
+        order.save()
+    return redirect('admin_orders') # ya jaha se aayi ho

@@ -253,7 +253,7 @@
     </div>
 
     <!-- Tracking Steps: Ordered -> Packed -> Shipped -->
-    <div class="track">
+    <!--<div class="track">
       <div class="line line-{{ order.status|lower }}"></div>
       <div class="step active">
         <div class="circle"><i class="fa-solid fa-check"></i></div>
@@ -267,7 +267,37 @@
         <div class="circle">{% if order.status in 'Shipped Delivered' %}<i class="fa-solid fa-check"></i>{% else %}3{% endif %}</div>
         <p>Shipped</p>
       </div>
-    </div>
+    </div> -->
+    
+    <div class="track">
+      <div class="line line-{{ order.status|lower }}"></div>
+  
+      <div class="step active">
+        <div class="circle"><i class="fa-solid fa-check"></i></div>
+        <p>Ordered</p>
+      </div>
+
+      <div class="step {% if order.status == 'Packed' or order.status == 'Shipped' or order.status == 'Delivered' %}active{% endif %}">
+         <div class="circle"> {% if order.status == 'Packed' or order.status == 'Shipped' or order.status == 'Delivered' %}
+          <i class="fa-solid fa-check"></i>
+          {% else %}
+            2
+          {% endif %}
+          </div>
+          <p>Packed</p>
+      </div>
+
+      <div class="step {% if order.status == 'Shipped' or order.status == 'Delivered' %}active{% endif %}">
+         <div class="circle"> {% if order.status == 'Shipped' or order.status == 'Delivered' %}
+         <i class="fa-solid fa-check"></i>
+         {% else %}
+            3
+         {% endif %}
+        </div>
+        <p>Shipped</p>
+       </div>
+
+</div>
 
     {% if order.items.all %}
     <div class="order-items-preview">
