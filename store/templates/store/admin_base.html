@@ -13,31 +13,32 @@
       --sidebar-dark-green: #075e05;
       --bg-light: #f4f6f8;
       --text-dark: #1f2937;
+      --sidebar-width: 250px;
     }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg-light);
       color: var(--text-dark);
       display: flex;
       min-height: 100vh;
+      overflow-x: hidden;
     }
-    /* Green Sidebar */
+
+    /* ── Sidebar ── */
     .admin-sidebar {
-      width: 250px;
+      width: var(--sidebar-width);
       background: var(--sidebar-green);
-      color: #ffffff;
+      color: #fff;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
       min-height: 100vh;
       box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-      position: relative;
-      z-index: 100;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 200;
+      transition: transform 0.3s ease;
     }
     .sidebar-brand {
       padding: 24px 20px;
@@ -48,16 +49,15 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      color: #ffffff;
+      color: #fff;
       text-decoration: none;
     }
-    .sidebar-brand i {
-      font-size: 24px;
-    }
+    .sidebar-brand i { font-size: 24px; }
     .sidebar-menu {
       list-style: none;
       padding: 20px 0;
       flex: 1;
+      overflow-y: auto;
     }
     .sidebar-menu li a {
       display: flex;
@@ -74,23 +74,34 @@
     .sidebar-menu li a:hover,
     .sidebar-menu li.active a {
       background: var(--sidebar-dark-green);
-      color: #ffffff;
+      color: #fff;
     }
-    .sidebar-menu li a i {
-      width: 20px;
-      text-align: center;
-      font-size: 16px;
+    .sidebar-menu li a i { width: 20px; text-align: center; font-size: 16px; }
+
+    /* Overlay backdrop for mobile sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 199;
     }
-    /* Main Area */
+    .sidebar-overlay.active { display: block; }
+
+    /* ── Main Content ── */
     .admin-main-wrapper {
       flex: 1;
       display: flex;
       flex-direction: column;
       min-width: 0;
+      margin-left: var(--sidebar-width);
+      transition: margin-left 0.3s ease;
     }
+
+    /* ── Topbar ── */
     .admin-topbar {
-      background: #ffffff;
-      padding: 14px 28px;
+      background: #fff;
+      padding: 14px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -99,19 +110,37 @@
       top: 0;
       z-index: 90;
       box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      gap: 10px;
     }
+    .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      color: #374151;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .hamburger-btn:hover { background: #f3f4f6; }
     .topbar-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
       color: #111827;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .topbar-actions {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
+      flex-shrink: 0;
     }
     .topbar-btn {
       display: inline-flex;
@@ -124,25 +153,21 @@
       text-decoration: none;
       transition: all 0.2s;
       cursor: pointer;
+      border: none;
+      white-space: nowrap;
     }
     .btn-view-store {
       background: #f0fdf4;
       color: #166534;
       border: 1px solid #bbf7d0;
     }
-    .btn-view-store:hover {
-      background: #dcfce7;
-      color: #14532d;
-    }
+    .btn-view-store:hover { background: #dcfce7; color: #14532d; }
     .btn-topbar-logout {
       background: #fef2f2;
       color: #991b1b;
       border: 1px solid #fecaca;
     }
-    .btn-topbar-logout:hover {
-      background: #fee2e2;
-      color: #7f1d1d;
-    }
+    .btn-topbar-logout:hover { background: #fee2e2; color: #7f1d1d; }
     .admin-user-wrap {
       position: relative;
       display: inline-block;
@@ -174,9 +199,7 @@
       border: 1px solid #e5e7eb;
     }
     .admin-dropdown.show,
-    .admin-user-wrap:hover .admin-dropdown {
-      display: block;
-    }
+    .admin-user-wrap:hover .admin-dropdown { display: block; }
     .admin-dropdown a {
       display: flex;
       align-items: center;
@@ -187,18 +210,16 @@
       font-size: 14px;
       padding: 6px 0;
     }
-    .admin-dropdown a:hover {
-      color: #9a0007;
-    }
-    .admin-content-area {
-      padding: 24px 28px;
-      flex: 1;
-    }
-    /* Common Card Styling */
+    .admin-dropdown a:hover { color: #9a0007; }
+
+    /* ── Content Area ── */
+    .admin-content-area { padding: 20px; flex: 1; }
+
+    /* ── Cards ── */
     .card {
-      background: #ffffff;
+      background: #fff;
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       border: 1px solid #e5e7eb;
       font-size: 15px;
@@ -218,12 +239,89 @@
       font-weight: 500;
       color: #4b5563;
     }
+
+    /* ── MOBILE RESPONSIVE ── */
+    /*@media (max-width: 768px) {
+      /* Sidebar hidden off-screen by default */
+      /*.admin-sidebar {
+        transform: translateX(-100%);
+      }
+      .admin-sidebar.open {
+        transform: translateX(0);
+      }
+      /* Main content takes full width */
+      /*.admin-main-wrapper {
+        margin-left: 0 !important;
+        width: 100%;
+      }
+      /* Show hamburger */
+      hamburger-btn { display: flex; }
+      /* Hide topbar title text on very small screens */
+      .topbar-title span { display: none; }
+      /* Hide View Store label text, keep icon */
+      .btn-view-store span { display: none; }
+      .btn-view-store { padding: 8px 10px; }
+      /* Logout text hidden on mobile */
+     .btn-topbar-logout span { display: none; }
+      .btn-topbar-logout { padding: 8px 10px; }
+      /* User trigger simplified */
+     .admin-user-trigger span { display: none; }
+      .admin-user-trigger { padding: 6px 8px; }
+      /* Content padding */
+      admin-content-area { padding: 12px 10px; }
+    }
+  
+  
+    @media (max-width: 480px) {
+      .topbar-title i { display: none; }
+    }
+
+    /* ── Full Width Fix (Mota PC ma nanu na dekhay) ── */
+    html, body {
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow-x: hidden;
+    }
+    .admin-main-wrapper,
+    .admin-content-area {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0;
+    }
+
+    /* ── Very Large Screen (1400px+) ── */
+    @media (min-width: 1400px) {
+      body { font-size: 16px; }
+      .dash-metric-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 25px !important;
+      }
+      .card {
+        padding: 28px !important;
+      }
+      .card h3 {
+        font-size: 20px !important;
+      }
+      .admin-content-area {
+        padding: 28px 36px !important;
+      }
+    }
+
+    /* ── Laptop (1024px – 1399px) ── */
+    @media (min-width: 1024px) and (max-width: 1399px) {
+      .dash-metric-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+      }
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
+  <!-- Sidebar overlay (tap to close on mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
   <!-- Sidebar -->
-  <aside class="admin-sidebar">
+  <aside class="admin-sidebar" id="adminSidebar">
     <a href="{% url 'admin_dashboard' %}" class="sidebar-brand">
       <i class="fa-solid fa-basket-shopping"></i>
       <span>Freshora Admin</span>
@@ -233,14 +331,14 @@
       <li><a href="{% url 'add_product' %}"><i class="fa-solid fa-box"></i> Add Product</a></li>
       <li><a href="{% url 'admin_orders' %}"><i class="fa-solid fa-clipboard-list"></i> Orders</a></li>
       <li><a href="{% url 'admin_logins' %}"><i class="fa-solid fa-users"></i> Logins</a></li>
-      <li><a href="javascript:void(0)" onclick="if(typeof openCategoryOnlyModal==='function'){openCategoryOnlyModal(); return false;} else {window.location.href='{% url 'admin_dashboard' %}?open=category';}"><i class="fa-solid fa-layer-group"></i> Categories</a></li>
-      <li><a href="javascript:void(0)" onclick="if(typeof openSubcategoryOnlyModal==='function'){openSubcategoryOnlyModal(); return false;} else {window.location.href='{% url 'admin_dashboard' %}?open=subcategory';}"><i class="fa-solid fa-tags"></i> Subcategories</a></li>
+      <li><a href="javascript:void(0)" onclick="if(typeof openCategoryOnlyModal==='function'){closeSidebar();openCategoryOnlyModal();} else {window.location.href='{% url 'admin_dashboard' %}?open=category';}"><i class="fa-solid fa-layer-group"></i> Categories</a></li>
+      <li><a href="javascript:void(0)" onclick="if(typeof openSubcategoryOnlyModal==='function'){closeSidebar();openSubcategoryOnlyModal();} else {window.location.href='{% url 'admin_dashboard' %}?open=subcategory';}"><i class="fa-solid fa-tags"></i> Subcategories</a></li>
       <li><a href="{% url 'dashboard_coupons' %}"><i class="fa-solid fa-ticket"></i> Coupons</a></li>
       <li style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.15);">
-        <a href="{% url 'home' %}" onclick="window.location.href='{% url 'home' %}';"><i class="fa-solid fa-store"></i> View Store</a>
+        <a href="{% url 'home' %}"><i class="fa-solid fa-store"></i> View Store</a>
       </li>
       <li>
-        <a href="{% url 'admin_logout' %}" onclick="window.location.href='{% url 'admin_logout' %}';"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        <a href="{% url 'admin_logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
       </li>
     </ul>
   </aside>
@@ -248,11 +346,17 @@
   <!-- Main Content Wrapper -->
   <div class="admin-main-wrapper">
     <header class="admin-topbar">
-      <div class="topbar-title">
-        <i class="fa-solid fa-chart-line" style="color:#0a7e07;"></i>
-        <span>Dashboard Overview</span>
+      <div class="topbar-left">
+        <!-- Hamburger (mobile only) -->
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="topbar-title">
+          <i class="fa-solid fa-chart-line" style="color:#0a7e07;"></i>
+          <span>Dashboard Overview</span>
+        </div>
       </div>
-      
+
       <div class="topbar-actions">
         <!-- View Store Button -->
         <a href="{% url 'home' %}" class="topbar-btn btn-view-store" title="Go to customer-facing store">
@@ -286,11 +390,26 @@
   </div>
 
   <script>
+    /* ── Sidebar Toggle (Mobile) ── */
+    function toggleSidebar() {
+      const sidebar = document.getElementById('adminSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    }
+    function closeSidebar() {
+      const sidebar = document.getElementById('adminSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    /* ── User Dropdown ── */
     function toggleUserDropdown(e) {
       const drop = document.getElementById('userDropdown');
-      if (drop) {
-        drop.classList.toggle('show');
-      }
+      if (drop) drop.classList.toggle('show');
     }
     document.addEventListener('click', function(e) {
       const wrap = document.querySelector('.admin-user-wrap');

@@ -1,8 +1,5 @@
 {% extends 'store/admin_base.html' %}
 {% block content %}
-<div style="text-align:right; margin-bottom:10px;">
-  <a href="{% url 'admin_logout' %}" style="background:#dc2626; color:white; padding:8px 14px; border-radius:6px; text-decoration:none; font-weight:bold;">Admin Logout</a>
-</div>
 <style>
   /* Clickable Cards & Interactions */
   .clickable-card {
@@ -297,10 +294,31 @@
   .btn-table-del:hover {
     text-decoration: underline;
   }
+
+  /* ── Mobile Responsive (dashboard-specific) ── */
+  @media (max-width: 768px) {
+    /* 5-card row → 2 columns */
+    .dash-metric-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    /* Stock chart + overview → stack vertically */
+    .dash-overview-row {
+      flex-direction: column !important;
+    }
+    .dash-overview-row > div {
+      width: 100% !important;
+    }
+  }
+  @media (max-width: 480px) {
+    /* Single column on very small */
+    .dash-metric-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
 </style>
 
 <!-- Top 5 Metric Cards (All Clickable) -->
-<div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:20px;">
+<div class="dash-metric-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:20px; margin-bottom:4px;">
   <div class="card clickable-card" onclick="openProductsModal('all')" title="Click to view and manage all products">
     <div class="card-inner">
       <span class="card-text">Total Products {{ total_products|default:"84" }}</span>
@@ -334,7 +352,7 @@
 </div>
 
 <!-- Middle Section: Stock by Category & System Overview (All Clickable) -->
-<div style="display:flex; gap:20px; margin-top:20px;">
+<div class="dash-overview-row" style="display:flex; gap:20px; margin-top:20px;">
   <div style="width:60%;" class="card" id="stockChartCard">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
       <h3 style="cursor:pointer; margin:0; display:flex; align-items:center; gap:6px;" onclick="openCategoryOnlyModal()" title="Click to manage all categories">
