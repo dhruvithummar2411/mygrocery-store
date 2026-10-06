@@ -134,3 +134,12 @@ LOGOUT_REDIRECT_URL = '/'
 # Branding
 SITE_NAME = "Freshora"
 SITE_TAGLINE = "by DailyDrop"
+
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://e.onrender.com']
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+ALLOWED_HOSTS = ['*']
